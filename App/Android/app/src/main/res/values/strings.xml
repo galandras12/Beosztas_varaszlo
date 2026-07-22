@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Beosztás Varázsló</string>
+
+    <string name="tab_settings">Beállítások</string>
+    <string name="tab_groups">Csoportok</string>
+    <string name="tab_employees">Dolgozók</string>
+    <string name="tab_schedule">Beosztás</string>
+    <string name="tab_print">Nyomtatás</string>
+
+    <string name="menu_export_db">Adatbázis mentése fájlba</string>
+    <string name="menu_import_db">Adatbázis betöltése fájlból</string>
+    <string name="menu_reset_db">Alaphelyzet</string>
+
+    <string name="action_save">Mentés</string>
+    <string name="action_cancel">Mégse</string>
+    <string name="action_delete">Törlés</string>
+    <string name="action_edit">Szerkesztés</string>
+    <string name="action_add">Hozzáadás</string>
+</resources>

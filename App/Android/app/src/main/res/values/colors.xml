@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="background">#F4F6F8</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#1F2937</color>
+    <color name="text_muted">#6B7280</color>
+    <color name="danger">#DC2626</color>
+    <color name="success">#16A34A</color>
+    <color name="warning">#D97706</color>
+    <color name="border">#D7DDE3</color>
+    <color name="weekend_bg">#F0F0F0</color>
+    <color name="holiday_bg">#FDE3E3</color>
+    <color name="vacation_bg">#DCF5DF</color>
+    <color name="absence_bg">#EFE6E0</color>
+    <color name="rest_bg">#E7EBEE</color>
+    <color name="ic_launcher_background">#2563EB</color>
+</resources>

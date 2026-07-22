@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxHeight="520dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <EditText
+            android:id="@+id/etGroupName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Munkacsoport neve" />
+
+        <RadioGroup
+            android:id="@+id/rgGroupType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <RadioButton
+                android:id="@+id/rbGeneral"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Általános (bármely nap, akár váltásos is)" />
+
+            <RadioButton
+                android:id="@+id/rbOffice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Iroda (hétfő-péntek, ünnepnap kivétel)" />
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/etDailyHours"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="Napi óraszám (egy műszak/munkanap hossza)"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etStaffPerShift"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="Szükséges létszám egy műszakban (0 = nincs figyelve)"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Műszaktípusok"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <LinearLayout
+            android:id="@+id/shiftTypesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/btnAddShiftType"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Új műszaktípus"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+</ScrollView>

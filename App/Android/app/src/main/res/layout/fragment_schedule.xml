@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardElevation="1dp"
+            app:cardCornerRadius="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hónap kiválasztása"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <EditText
+                        android:id="@+id/etYear"
+                        android:layout_width="110dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Év"
+                        android:inputType="number" />
+
+                    <Button
+                        android:id="@+id/btnCopyPrevCarry"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Előző havi maradvány másolása"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:columnCount="4"
+                    android:rowCount="3">
+
+                    <Button android:id="@+id/btnMonth1" style="?attr/borderlessButtonStyle" android:text="Jan" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth2" style="?attr/borderlessButtonStyle" android:text="Feb" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth3" style="?attr/borderlessButtonStyle" android:text="Már" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth4" style="?attr/borderlessButtonStyle" android:text="Ápr" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth5" style="?attr/borderlessButtonStyle" android:text="Máj" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth6" style="?attr/borderlessButtonStyle" android:text="Jún" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth7" style="?attr/borderlessButtonStyle" android:text="Júl" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth8" style="?attr/borderlessButtonStyle" android:text="Aug" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth9" style="?attr/borderlessButtonStyle" android:text="Sze" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth10" style="?attr/borderlessButtonStyle" android:text="Okt" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth11" style="?attr/borderlessButtonStyle" android:text="Nov" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth12" style="?attr/borderlessButtonStyle" android:text="Dec" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardElevation="1dp"
+            app:cardCornerRadius="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:id="@+id/tvScheduleTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Koppints egy napra a kódjelzés kiválasztásához. Jobbra görgetve láthatók az óraszám-oszlopok."
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/namesColumn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <HorizontalScrollView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <LinearLayout
+                            android:id="@+id/daysColumn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+                    </HorizontalScrollView>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="1dp"
+            app:cardCornerRadius="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Műszak-lefedettség"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary" />
+
+                <LinearLayout
+                    android:id="@+id/coverageContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="6dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>
