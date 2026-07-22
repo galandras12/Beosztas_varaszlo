@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beosztás Varázsló</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Beosztás Varázsló</h1>
+  <div class="db-actions">
+    <button id="btnExportDb" title="A teljes adatbázis (munkacsoportok, dolgozók, beosztások) egyetlen JSON fájlba mentése">Adatbázis mentése fájlba</button>
+    <button id="btnImportDb" title="Korábban mentett adatbázis fájl betöltése">Adatbázis betöltése fájlból</button>
+    <input type="file" id="fileImportDb" accept="application/json,.json" hidden>
+    <button id="btnResetDb" class="danger">Alaphelyzet</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn" data-tab="settings">Beállítások</button>
+  <button class="tab-btn" data-tab="groups">Munkacsoportok</button>
+  <button class="tab-btn" data-tab="employees">Dolgozók</button>
+  <button class="tab-btn" data-tab="schedule">Beosztás</button>
+  <button class="tab-btn" data-tab="print">Nyomtatás / Export</button>
+</nav>
+
+<main>
+
+  <section id="tab-settings" class="tab-panel">
+    <div class="card">
+      <h2>Havi kötelező óraszám és munkanapok (alapérték)</h2>
+      <p class="hint">Ez az érték egy teljes munkaidős dolgozó havi kötelező óraszámát adja meg. Egyedi dolgozóknál a
+        munkaidő-arány (pl. részmunkaidő = 0.5) ezt szorozza meg, a kivett szabadság és hiányzás pedig csökkenti.</p>
+      <div id="monthHoursTable"></div>
+      <div class="row" style="margin-top:.5em">
+        <button id="btnResetMonthHours">Alapértékek visszaállítása</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Munkaszüneti napok</h2>
+      <p class="hint">A magyar munkaszüneti napok (fix és húsvéthez kötött mozgó ünnepek) automatikusan számolódnak.
+        Egyedi ünnepnapot is felvehetsz, vagy kikapcsolhatsz egy automatikusat.</p>
+      <div class="row"><label>Év<input type="number" id="holidayYear"></label></div>
+      <div id="holidayList"></div>
+      <div class="row" style="margin-top:.5em">
+        <label>Dátum<input type="date" id="newHolidayDate"></label>
+        <label>Név<input type="text" id="newHolidayName" placeholder="pl. Cégünnepség"></label>
+        <button id="btnAddHoliday">Hozzáadás</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-groups" class="tab-panel">
+    <div class="card">
+      <h2>Munkacsoportok (munkaágak)</h2>
+      <p class="hint">Például: 12 órás váltásban dolgozó ápolók, 8 órás takarítók, 4 órás részmunkaidősök, hétfőtől
+        péntekig dolgozó irodai munkatársak. Tetszőleges számú munkacsoport hozható létre.</p>
+      <button id="btnAddGroup" class="primary">+ Új munkacsoport</button>
+    </div>
+    <div id="groupsList"></div>
+  </section>
+
+  <section id="tab-employees" class="tab-panel">
+    <div class="card">
+      <h2>Dolgozók</h2>
+      <div class="row">
+        <button id="btnAddEmployee" class="primary">+ Új dolgozó</button>
+        <label>Szabadság-nyilvántartás éve<input type="number" id="empVacationYear"></label>
+      </div>
+    </div>
+    <div id="employeesList"></div>
+  </section>
+
+  <section id="tab-schedule" class="tab-panel">
+    <div class="card">
+      <h2>Hónap kiválasztása</h2>
+      <div class="row">
+        <label>Év<input type="number" id="schYear"></label>
+        <button id="btnCopyPrevCarry">Előző havi maradvány másolása bejövő óraként</button>
+      </div>
+      <div class="month-list" id="monthList"></div>
+    </div>
+    <div class="card">
+      <h2 id="scheduleTitle">Beosztás</h2>
+      <p class="hint">Kattints egy napra a kódjelzés kiválasztásához. Irodai csoportnál hétvégén/ünnepnapon nincs
+        munkavégzés (szürkével jelölve), munkanapon SZ (szabadság) vagy H (hiányzás) jelölhető.</p>
+      <div class="legend" id="scheduleLegend"></div>
+      <div class="schedule-scroll"><div id="scheduleTableWrap"></div></div>
+    </div>
+    <div class="card" id="coverageCard">
+      <h2>Műszak-lefedettség</h2>
+      <p class="hint">Azon munkacsoportoknál, ahol meg van adva, hány dolgozónak kell egy műszakban együtt dolgoznia.</p>
+      <div id="coverageWrap"></div>
+    </div>
+  </section>
+
+  <section id="tab-print" class="tab-panel">
+    <div class="card">
+      <h2>Nyomtatás / Export</h2>
+      <p class="hint">A "Nyomtatás" a böngésző nyomtatási párbeszédablakát nyitja meg (A4 fekvő, több oldalon is,
+        onnan PDF-ként is elmenthető). A "Mentés PDF-ként" / "Mentés JPG-ként" gomb egyetlen A4 fekvő oldalra
+        illeszti a táblázatot.</p>
+      <div class="row">
+        <button id="btnPrint" class="primary">Nyomtatás</button>
+        <button id="btnExportPdf">Mentés PDF-ként</button>
+        <button id="btnExportJpg">Mentés JPG-ként</button>
+      </div>
+    </div>
+    <div class="card">
+      <div id="printArea"></div>
+    </div>
+  </section>
+
+</main>
+
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="js/holidays.js"></script>
+<script src="js/db.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/ui-common.js"></script>
+<script src="js/ui-settings.js"></script>
+<script src="js/ui-groups.js"></script>
+<script src="js/ui-employees.js"></script>
+<script src="js/ui-schedule.js"></script>
+<script src="js/ui-print.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
