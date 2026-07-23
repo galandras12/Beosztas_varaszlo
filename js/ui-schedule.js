@@ -16,11 +16,17 @@
 
   function cellOptionsFor(group) {
     if (group.type === 'iroda') {
-      return [{ value: '', label: 'Munka' }, { value: 'SZ', label: 'SZ – Szabadság' }, { value: 'H', label: 'H – Hiányzás' }];
+      return [
+        { value: '', label: 'Munka' },
+        { value: 'SZ', label: 'SZ – Szabadság' },
+        { value: 'BSZ', label: 'BSZ – Beteg szabadság' },
+        { value: 'H', label: 'H – Hiányzás' }
+      ];
     }
     const opts = [{ value: '', label: '—' }];
     (group.shiftTypes || []).forEach(st => opts.push({ value: st.code, label: st.code + ' – ' + st.label }));
     opts.push({ value: 'SZ', label: 'SZ – Szabadság' });
+    opts.push({ value: 'BSZ', label: 'BSZ – Beteg szabadság' });
     opts.push({ value: 'H', label: 'H – Hiányzás' });
     opts.push({ value: 'P', label: 'P – Pihenőnap' });
     return opts;
@@ -181,7 +187,29 @@
         return;
       }
       Calc.setCell(state, selYear, selMonth, employee.id, day, newCode);
-      DB.save();
+
+      // Hirtelen beteg szabadság: ha egy műszakban dolgozó (egymást váltó) csoporttag
+      // munkanapja beteg szabadságra vált, automatikusan keresünk rá helyettest.
+      const wasWorkingShift = (group.shiftTypes || []).some(st => st.code === oldCode);
+      if (newCode === 'BSZ' && oldCode !== 'BSZ' && group.staffPerShift > 0 && wasWorkingShift) {
+        const groupEmployees = state.employees.filter(e => e.groupId === group.id);
+        const substitute = Calc.findSickSubstitute(state, group, groupEmployees, selYear, selMonth, day, employee.id, oldCode);
+        DB.save();
+        if (substitute) {
+          UI.toast(
+            employee.name + ' beteg szabadságra került (' + day + '. nap). Automatikus helyettes: ' +
+            substitute.name + ' (' + oldCode + ' műszak).',
+            'success'
+          );
+        } else {
+          UI.toast(
+            employee.name + ' beteg szabadságra került (' + day + '. nap), de nincs elérhető szabad helyettes - a műszak létszáma emiatt a szükséges alá csökkenhet!',
+            'error'
+          );
+        }
+      } else {
+        DB.save();
+      }
       renderScheduleTable();
     }
     select.addEventListener('change', commit);
@@ -193,7 +221,8 @@
     const wrap = document.getElementById('scheduleLegend');
     wrap.innerHTML = '';
     const items = [
-      ['#dcf5df', 'SZ – Szabadság'], ['#efe6e0', 'H – Egyéb hiányzás'], ['#e7ebee', 'P – Pihenőnap'],
+      ['#dcf5df', 'SZ – Szabadság'], ['#f8d7d5', 'BSZ – Beteg szabadság'],
+      ['#efe6e0', 'H – Egyéb hiányzás'], ['#e7ebee', 'P – Pihenőnap'],
       ['#fde3e3', 'Ünnepnap'], ['#f5f5f5', 'Hétvége'], ['#f0f0f0', 'Nem munkanap (iroda)']
     ];
     items.forEach(([color, label]) => {

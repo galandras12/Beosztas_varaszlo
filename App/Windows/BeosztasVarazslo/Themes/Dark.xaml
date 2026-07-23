@@ -23,6 +23,7 @@
     <SolidColorBrush x:Key="WeekendBrush" Color="#2A2A2A" />
     <SolidColorBrush x:Key="HolidayBrush" Color="#442726" />
     <SolidColorBrush x:Key="VacationBrush" Color="#243324" />
+    <SolidColorBrush x:Key="SickBrush" Color="#442726" />
     <SolidColorBrush x:Key="AbsenceBrush" Color="#332C24" />
     <SolidColorBrush x:Key="RestBrush" Color="#282E33" />
 

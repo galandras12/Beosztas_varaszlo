@@ -31,7 +31,11 @@ Mindhárom verzió ugyanazt az öt fő területet fedi le:
    hétvégén/ünnepnapon automatikusan nincs munkavégzés. Kézzel beírható, hogy egy dolgozó
    hány plusz (vagy mínusz) órával kezdi a hónapot ("bejövő óra"); az automatikusan számolt
    egyenleg egy gombbal átvihető a következő hónapra. Megjelenik a műszak-lefedettség is
-   (hányan dolgoznak egy műszakban a beállított elváráshoz képest).
+   (hányan dolgoznak egy műszakban a beállított elváráshoz képest). Ha valaki hirtelen
+   **beteg szabadságra (BSZ)** megy, az egymást váltó (pl. 12 órás ápolói) csoportoknál a
+   program automatikusan megkeresi és beosztja az adott napra egy szabad, addig legkevesebb
+   órát ledolgozó kollégát a műszak fedezésére; 8 órás irodai dolgozóknál a beteg szabadság
+   csak jelölésre kerül, automatikus átszervezés nélkül.
 5. **Nyomtatás / Export** – A4 fekvő elrendezésű, munkakör szerint ABC sorrendbe rendezett
    nyomtatható táblázat, a hónap számával/nevével a tetején, a sorok végén a következő
    hónapra átvitt órákkal. Exportálható PDF-be (több oldalra törve, ha sok a dolgozó) és

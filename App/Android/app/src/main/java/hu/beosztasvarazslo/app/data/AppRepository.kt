@@ -97,6 +97,8 @@ class AppRepository(private val db: AppDatabase) {
 
     suspend fun getEmployees(): List<EmployeeEntity> = employeeDao.getAll()
 
+    suspend fun getEmployeesForGroup(groupId: Long): List<EmployeeEntity> = employeeDao.getForGroup(groupId)
+
     suspend fun saveEmployee(employee: EmployeeEntity): Long =
         if (employee.id == 0L) employeeDao.insert(employee) else { employeeDao.update(employee); employee.id }
 
@@ -156,6 +158,45 @@ class AppRepository(private val db: AppDatabase) {
 
     suspend fun yearVacationUsed(employeeId: Long, year: Int): Int =
         scheduleDao.getForEmployeeYear(employeeId, year).count { it.code == ScheduleCalculator.CODE_VACATION }
+
+    /**
+     * Hirtelen beteg szabadság esetén automatikus helyettes-keresés: az adott napon szabad
+     * (aznapra még be nem osztott) csoporttagok közül azt választja, akinek eddig a legkevesebb
+     * ledolgozott órája van ebben a hónapban, és őt állítja be a beteg dolgozó műszakjára.
+     * @return a kiválasztott helyettesítő, vagy null, ha nincs elérhető szabad dolgozó.
+     */
+    suspend fun findSickSubstitute(
+        group: WorkGroupEntity,
+        employees: List<EmployeeEntity>,
+        year: Int,
+        month: Int,
+        day: Int,
+        sickEmployeeId: Long,
+        shiftCode: String
+    ): EmployeeEntity? {
+        val holidayMap = getHolidayMap(year)
+        val baseHours = getMonthHours()[month]?.hours ?: 0.0
+
+        var best: EmployeeEntity? = null
+        var bestHours = Double.MAX_VALUE
+        for (emp in employees) {
+            if (emp.id == sickEmployeeId) continue
+            val codes = getMonthCodes(emp.id, year, month)
+            if (!codes[day].isNullOrEmpty()) continue // aznap már be van osztva valamire
+
+            val carryIn = getCarryIn(emp.id, year, month)
+            val summary = ScheduleCalculator.summarizeMonth(
+                group.type, group.dailyHours, shiftTypeDao.getForGroup(group.id), emp.employmentFactor,
+                baseHours, codes, holidayMap, carryIn, year, month
+            )
+            if (summary.actualHours < bestHours) {
+                bestHours = summary.actualHours
+                best = emp
+            }
+        }
+        if (best != null) setCell(best.id, year, month, day, shiftCode)
+        return best
+    }
 
     // ---------- JSON export / import (biztonsági mentés, hordozhatóság) ----------
     // A tényleges "adatbázis" maga a Room által kezelt, titkosítatlan SQLite fájl

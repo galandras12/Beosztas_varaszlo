@@ -30,6 +30,7 @@ const val GROUP_TYPE_GENERAL = "ALTALANOS"
 /** Óraszám-számítási motor: kötelező havi óraszám, ledolgozott óra, maradvány (a web app calc.js-ének Kotlin megfelelője). */
 object ScheduleCalculator {
     const val CODE_VACATION = "SZ"
+    const val CODE_SICK = "BSZ"
     const val CODE_ABSENCE = "H"
     const val CODE_REST = "P"
 
@@ -60,14 +61,14 @@ object ScheduleCalculator {
             if (!isOfficeWorkdayFlag) return CellInfo(0.0, CellKind.NONWORK)
             return when (code) {
                 CODE_VACATION -> CellInfo(0.0, CellKind.VACATION)
-                CODE_ABSENCE -> CellInfo(0.0, CellKind.ABSENCE)
+                CODE_ABSENCE, CODE_SICK -> CellInfo(0.0, CellKind.ABSENCE)
                 else -> CellInfo(groupDailyHours, CellKind.WORK, "M")
             }
         }
         if (code.isNullOrEmpty()) return CellInfo(0.0, CellKind.EMPTY)
         return when (code) {
             CODE_VACATION -> CellInfo(0.0, CellKind.VACATION)
-            CODE_ABSENCE -> CellInfo(0.0, CellKind.ABSENCE)
+            CODE_ABSENCE, CODE_SICK -> CellInfo(0.0, CellKind.ABSENCE)
             CODE_REST -> CellInfo(0.0, CellKind.REST)
             else -> {
                 val st = shiftTypes.find { it.code == code }
@@ -128,11 +129,15 @@ object ScheduleCalculator {
     /** A cellára kattintva választható kódok (kód, megjelenített címke) párokban. */
     fun cellOptions(groupType: String, shiftTypes: List<ShiftTypeEntity>): List<Pair<String, String>> {
         if (groupType == GROUP_TYPE_OFFICE) {
-            return listOf("" to "Munka", CODE_VACATION to "SZ – Szabadság", CODE_ABSENCE to "H – Hiányzás")
+            return listOf(
+                "" to "Munka", CODE_VACATION to "SZ – Szabadság",
+                CODE_SICK to "BSZ – Beteg szabadság", CODE_ABSENCE to "H – Hiányzás"
+            )
         }
         val opts = mutableListOf("" to "—")
         shiftTypes.forEach { opts.add(it.code to (it.code + " – " + it.label)) }
         opts.add(CODE_VACATION to "SZ – Szabadság")
+        opts.add(CODE_SICK to "BSZ – Beteg szabadság")
         opts.add(CODE_ABSENCE to "H – Hiányzás")
         opts.add(CODE_REST to "P – Pihenőnap")
         return opts

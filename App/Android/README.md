@@ -46,6 +46,8 @@ Teendők az első megnyitáskor:
   egy gombbal átvihető a következő hónapra.
 - Ápolóknál (vagy bármely csoportnál) beállítható, hányan dolgozzanak egy műszakban –
   a Beosztás fülön lefedettség-kijelzés (piros/zöld/narancs).
+- Hirtelen beteg szabadság (BSZ): egymást váltó csoportoknál automatikus helyettes-keresés
+  és beosztás; irodai dolgozóknál egyszerű jelölés, átszervezés nélkül.
 - Nyomtatás/Export: A4 fekvő, munkakör szerint ABC sorrendben, a hónap számával/nevével,
   a sorok végén a következő hónapra átvitt órákkal – PDF (több oldalas) és JPG export,
   megosztás más alkalmazásba (FileProvider).

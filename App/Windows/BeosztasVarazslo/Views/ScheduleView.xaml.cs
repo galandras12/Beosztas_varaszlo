@@ -196,6 +196,7 @@ public partial class ScheduleView : UserControl, IRefreshableView
             Brush? cellBg = code switch
             {
                 ShiftCodes.Vacation => (Brush)FindResource("VacationBrush"),
+                ShiftCodes.Sick => (Brush)FindResource("SickBrush"),
                 ShiftCodes.Absence => (Brush)FindResource("AbsenceBrush"),
                 ShiftCodes.Rest => (Brush)FindResource("RestBrush"),
                 _ => isHoliday ? (Brush)FindResource("HolidayBrush") : isWeekend ? (Brush)FindResource("WeekendBrush") : null
@@ -271,6 +272,27 @@ public partial class ScheduleView : UserControl, IRefreshableView
             }
         }
         _repo.SetCell(employee.Id, _selYear, _selMonth, day, newCode);
+
+        // Hirtelen beteg szabadság: ha egymást váltó (StaffPerShift > 0) csoportban egy
+        // munkanap beteg szabadságra vált, automatikusan keresünk rá helyettest.
+        bool wasWorkingShift = group.ShiftTypes.Any(st => st.Code == oldCode);
+        if (newCode == ShiftCodes.Sick && oldCode != ShiftCodes.Sick && group.StaffPerShift > 0 && wasWorkingShift)
+        {
+            var groupEmployees = _repo.GetEmployeesForGroup(group.Id);
+            var substitute = _repo.FindSickSubstitute(group, groupEmployees, _selYear, _selMonth, day, employee.Id, oldCode);
+            if (substitute != null)
+            {
+                MessageBox.Show(Window.GetWindow(this),
+                    $"{employee.Name} beteg szabadságra került ({day}. nap). Automatikus helyettes: {substitute.Name} ({oldCode} műszak).",
+                    "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show(Window.GetWindow(this),
+                    $"{employee.Name} beteg szabadságra került ({day}. nap), de nincs elérhető szabad helyettes - a műszak létszáma emiatt a szükséges alá csökkenhet!",
+                    "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
         RebuildGrid();
     }
 

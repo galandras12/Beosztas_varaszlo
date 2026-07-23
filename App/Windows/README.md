@@ -60,6 +60,8 @@ Teendők az első megnyitáskor:
   gombbal átvihető a következő hónapra.
 - Egy műszakban szükséges létszám beállítása (pl. ápolóknál), lefedettség-kijelzés
   piros/sárga/zöld színezéssel.
+- Hirtelen beteg szabadság (BSZ): egymást váltó csoportoknál automatikus helyettes-keresés
+  és beosztás; irodai dolgozóknál egyszerű jelölés, átszervezés nélkül.
 - Nyomtatás/Export: A4 fekvő, munkakör szerint ABC sorrendben, a hónap számával/nevével, a
   sorok végén a következő hónapra átvitt órákkal - PDF (több oldalas) és JPG export.
 - Adatbázis mentése/betöltése JSON fájlba a bal oldali sáv alján, az alkalmazás saját

@@ -189,6 +189,7 @@ class ScheduleFragment : Fragment() {
             val code = codes[d] ?: ""
             val bg = when (code) {
                 ScheduleCalculator.CODE_VACATION -> R.color.vacation_bg
+                ScheduleCalculator.CODE_SICK -> R.color.sick_bg
                 ScheduleCalculator.CODE_ABSENCE -> R.color.absence_bg
                 ScheduleCalculator.CODE_REST -> R.color.rest_bg
                 else -> if (isHoliday) R.color.holiday_bg else if (isWeekend) R.color.weekend_bg else null
@@ -243,6 +244,21 @@ class ScheduleFragment : Fragment() {
                         }
                     }
                     repo().setCell(employee.id, selYear, selMonth, day, newCode)
+
+                    // Hirtelen beteg szabadság: ha egymást váltó (staffPerShift > 0) csoportban
+                    // egy munkanap beteg szabadságra vált, automatikusan keresünk rá helyettest.
+                    val wasWorkingShift = gws.shiftTypes.any { it.code == oldCode }
+                    if (newCode == ScheduleCalculator.CODE_SICK && oldCode != ScheduleCalculator.CODE_SICK &&
+                        gws.group.staffPerShift > 0 && wasWorkingShift
+                    ) {
+                        val groupEmployees = repo().getEmployeesForGroup(gws.group.id)
+                        val substitute = repo().findSickSubstitute(gws.group, groupEmployees, selYear, selMonth, day, employee.id, oldCode)
+                        if (substitute != null) {
+                            toast("${employee.name} beteg szabadságra került ($day. nap). Automatikus helyettes: ${substitute.name} ($oldCode műszak).")
+                        } else {
+                            toast("${employee.name} beteg szabadságra került ($day. nap), de nincs elérhető szabad helyettes - a műszak létszáma emiatt a szükséges alá csökkenhet!")
+                        }
+                    }
                     rebuildGrid()
                 }
             }

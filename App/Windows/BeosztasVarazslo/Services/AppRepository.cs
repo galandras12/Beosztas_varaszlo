@@ -226,4 +226,37 @@ public class AppRepository
         }
         return total;
     }
+
+    /// <summary>
+    /// Hirtelen beteg szabadság esetén automatikus helyettes-keresés: az adott napon szabad
+    /// (aznapra még be nem osztott) csoporttagok közül azt választja, akinek eddig a legkevesebb
+    /// ledolgozott órája van ebben a hónapban, és őt állítja be a beteg dolgozó műszakjára.
+    /// </summary>
+    /// <returns>A kiválasztott helyettesítő, vagy null, ha nincs elérhető szabad dolgozó.</returns>
+    public Employee? FindSickSubstitute(WorkGroup group, List<Employee> employees, int year, int month, int day, long sickEmployeeId, string shiftCode)
+    {
+        var holidayMap = GetHolidayMap(year);
+        var baseHours = GetMonthHours(month)?.Hours ?? 0;
+
+        Employee? best = null;
+        double bestHours = double.MaxValue;
+        foreach (var emp in employees)
+        {
+            if (emp.Id == sickEmployeeId) continue;
+            var codes = GetMonthCodes(emp.Id, year, month);
+            if (codes.TryGetValue(day, out var existing) && !string.IsNullOrEmpty(existing)) continue;
+
+            var carryIn = GetCarryIn(emp.Id, year, month);
+            var summary = ScheduleCalculator.SummarizeMonth(
+                group.Type, group.DailyHours, group.ShiftTypes, emp.EmploymentFactor, baseHours,
+                codes, holidayMap, carryIn, year, month);
+            if (summary.ActualHours < bestHours)
+            {
+                bestHours = summary.ActualHours;
+                best = emp;
+            }
+        }
+        if (best != null) SetCell(best.Id, year, month, day, shiftCode);
+        return best;
+    }
 }

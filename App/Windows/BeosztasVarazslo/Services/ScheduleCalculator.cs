@@ -49,7 +49,7 @@ public static class ScheduleCalculator
             return code switch
             {
                 ShiftCodes.Vacation => new CellInfo(0, CellKind.Vacation),
-                ShiftCodes.Absence => new CellInfo(0, CellKind.Absence),
+                ShiftCodes.Absence or ShiftCodes.Sick => new CellInfo(0, CellKind.Absence),
                 _ => new CellInfo(groupDailyHours, CellKind.Work, "M")
             };
         }
@@ -58,7 +58,7 @@ public static class ScheduleCalculator
         switch (code)
         {
             case ShiftCodes.Vacation: return new CellInfo(0, CellKind.Vacation);
-            case ShiftCodes.Absence: return new CellInfo(0, CellKind.Absence);
+            case ShiftCodes.Absence: case ShiftCodes.Sick: return new CellInfo(0, CellKind.Absence);
             case ShiftCodes.Rest: return new CellInfo(0, CellKind.Rest);
             default:
                 var st = shiftTypes.Find(s => s.Code == code);
@@ -122,12 +122,14 @@ public static class ScheduleCalculator
         {
             return new List<(string, string)>
             {
-                ("", "Munka"), (ShiftCodes.Vacation, "SZ – Szabadság"), (ShiftCodes.Absence, "H – Hiányzás")
+                ("", "Munka"), (ShiftCodes.Vacation, "SZ – Szabadság"),
+                (ShiftCodes.Sick, "BSZ – Beteg szabadság"), (ShiftCodes.Absence, "H – Hiányzás")
             };
         }
         var opts = new List<(string, string)> { ("", "—") };
         foreach (var st in shiftTypes) opts.Add((st.Code, $"{st.Code} – {st.Label}"));
         opts.Add((ShiftCodes.Vacation, "SZ – Szabadság"));
+        opts.Add((ShiftCodes.Sick, "BSZ – Beteg szabadság"));
         opts.Add((ShiftCodes.Absence, "H – Hiányzás"));
         opts.Add((ShiftCodes.Rest, "P – Pihenőnap"));
         return opts;

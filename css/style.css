@@ -120,6 +120,7 @@ table.schedule td.weekend { background: #f5f5f5; }
 table.schedule td.holiday { background: #fde3e3; }
 table.schedule td.nonwork { background: #f0f0f0; color: #aaa; cursor: default; }
 table.schedule td.code-SZ { background: #dcf5df; color:#1b5e20; font-weight:600; }
+table.schedule td.code-BSZ { background: #f8d7d5; color:#8f1e1e; font-weight:600; }
 table.schedule td.code-H { background: #efe6e0; color:#5d4037; font-weight:600; }
 table.schedule td.code-P { background: #e7ebee; color:#455a64; }
 table.schedule td.stat-col { font-weight: 600; }

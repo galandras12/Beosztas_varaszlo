@@ -25,7 +25,8 @@
   // Univerzális, minden munkacsoportra érvényes speciális kódok.
   const SPECIAL_CODES = {
     SZ: { label: 'Szabadság', short: 'SZ', color: '#2e7d32', vacation: true },
-    H: { label: 'Egyéb hiányzás (táppénz stb.)', short: 'H', color: '#8d6e63' },
+    BSZ: { label: 'Beteg szabadság', short: 'BSZ', color: '#c62828', sick: true },
+    H: { label: 'Egyéb hiányzás', short: 'H', color: '#8d6e63' },
     P: { label: 'Pihenőnap', short: 'P', color: '#78909c' }
   };
 

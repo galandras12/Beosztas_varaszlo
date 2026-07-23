@@ -9,6 +9,7 @@ public static class GroupTypes
 public static class ShiftCodes
 {
     public const string Vacation = "SZ";
+    public const string Sick = "BSZ";
     public const string Absence = "H";
     public const string Rest = "P";
 }

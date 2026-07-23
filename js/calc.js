@@ -74,13 +74,13 @@
       if (!isOfficeWorkday(state, year, month, day)) return { hours: 0, kind: 'nonwork' };
       const code = getCell(state, year, month, employee.id, day);
       if (code === 'SZ') return { hours: 0, kind: 'vacation' };
-      if (code === 'H') return { hours: 0, kind: 'absence' };
+      if (code === 'H' || code === 'BSZ') return { hours: 0, kind: 'absence' };
       return { hours: group.dailyHours, kind: 'work', code: 'M' };
     }
     const code = getCell(state, year, month, employee.id, day);
     if (!code) return { hours: 0, kind: 'empty' };
     if (code === 'SZ') return { hours: 0, kind: 'vacation' };
-    if (code === 'H') return { hours: 0, kind: 'absence' };
+    if (code === 'H' || code === 'BSZ') return { hours: 0, kind: 'absence' };
     if (code === 'P') return { hours: 0, kind: 'rest' };
     const st = getShiftTypeByCode(group, code);
     if (st) return { hours: st.hours, kind: 'work', code: st.code };
@@ -137,10 +137,39 @@
     return counts;
   }
 
+  /**
+   * Hirtelen beteg szabadság esetén automatikus helyettes-keresés: az adott napon szabad
+   * (aznapra még be nem osztott) dolgozók közül azt választja, akinek eddig a legkevesebb
+   * ledolgozott órája van ebben a hónapban (méltányos terheléselosztás), és őt állítja be
+   * a beteg dolgozó műszakjára. Csak azoknál a csoportoknál releváns, ahol meg van adva az
+   * egy műszakban szükséges létszám (pl. egymást váltó 12 órás ápolók) - ott hívandó, ahol
+   * egy dolgozó munkanapja beteg szabadságra (BSZ) változik.
+   * @returns a helyettesítő dolgozó objektuma, vagy null, ha nincs elérhető helyettes.
+   */
+  function findSickSubstitute(state, group, employees, year, month, day, sickEmployeeId, shiftCode) {
+    let best = null;
+    let bestHours = Infinity;
+    employees.forEach(emp => {
+      if (emp.id === sickEmployeeId) return;
+      const code = getCell(state, year, month, emp.id, day);
+      if (code) return; // aznap már be van osztva valamire (munka, szabadság, pihenő stb.)
+      const summary = summarizeEmployeeMonth(state, group, emp, year, month);
+      if (summary.actualHours < bestHours) {
+        bestHours = summary.actualHours;
+        best = emp;
+      }
+    });
+    if (best) {
+      setCell(state, year, month, best.id, day, shiftCode);
+    }
+    return best;
+  }
+
   global.App = global.App || {};
   global.App.Calc = {
     daysInMonth, isWeekend, getHolidayMap, isHoliday, isOfficeWorkday,
     getShiftTypeByCode, getCell, setCell, getCarryIn, setCarryIn,
-    cellHours, summarizeEmployeeMonth, yearVacationUsed, shiftCoverage
+    cellHours, summarizeEmployeeMonth, yearVacationUsed, shiftCoverage,
+    findSickSubstitute
   };
 })(window);
