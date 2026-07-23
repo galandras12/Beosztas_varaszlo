@@ -92,6 +92,7 @@ class GroupsFragment : Fragment() {
         fun syncForOfficeType() {
             val isOffice = dialogBinding.rbOffice.isChecked
             dialogBinding.btnAddShiftType.visibility = if (isOffice) View.GONE else View.VISIBLE
+            dialogBinding.etMinRestHours.visibility = if (isOffice) View.GONE else View.VISIBLE
             shiftRowBindings.forEach { it.btnRemove.visibility = if (isOffice) View.GONE else View.VISIBLE }
             if (isOffice) {
                 dialogBinding.shiftTypesContainer.removeAllViews()
@@ -107,11 +108,13 @@ class GroupsFragment : Fragment() {
             dialogBinding.rbGeneral.isChecked = existing.group.type != GROUP_TYPE_OFFICE
             dialogBinding.etDailyHours.setText(formatNum(existing.group.dailyHours))
             dialogBinding.etStaffPerShift.setText(existing.group.staffPerShift.toString())
+            dialogBinding.etMinRestHours.setText(existing.group.minRestHours.toString())
             if (existing.shiftTypes.isEmpty()) addShiftRow("M", "Munka", formatNum(existing.group.dailyHours))
             else existing.shiftTypes.forEach { addShiftRow(it.code, it.label, formatNum(it.hours)) }
         } else {
             dialogBinding.etDailyHours.setText("8")
             dialogBinding.etStaffPerShift.setText("0")
+            dialogBinding.etMinRestHours.setText("24")
             addShiftRow("M", "Munka", "8")
         }
 
@@ -134,6 +137,7 @@ class GroupsFragment : Fragment() {
                         val type = if (dialogBinding.rbOffice.isChecked) GROUP_TYPE_OFFICE else GROUP_TYPE_GENERAL
                         val dailyHours = dialogBinding.etDailyHours.text.toString().toDoubleOrNull() ?: 0.0
                         val staffPerShift = dialogBinding.etStaffPerShift.text.toString().toIntOrNull() ?: 0
+                        val minRestHours = (dialogBinding.etMinRestHours.text.toString().toIntOrNull() ?: 24).coerceAtLeast(0)
                         val shiftTypes = shiftRowBindings.mapNotNull { rb ->
                             val code = rb.etCode.text.toString().trim()
                             if (code.isEmpty()) return@mapNotNull null
@@ -148,7 +152,8 @@ class GroupsFragment : Fragment() {
 
                         val group = WorkGroupEntity(
                             id = existing?.group?.id ?: 0,
-                            name = name, type = type, dailyHours = dailyHours, staffPerShift = staffPerShift
+                            name = name, type = type, dailyHours = dailyHours, staffPerShift = staffPerShift,
+                            minRestHours = minRestHours
                         )
                         lifecycleScope.launch {
                             repo().saveGroup(group, shiftTypes)

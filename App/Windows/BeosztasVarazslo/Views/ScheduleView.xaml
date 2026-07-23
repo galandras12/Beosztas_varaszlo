@@ -14,6 +14,8 @@
                     <Button x:Name="BtnCopyPrevCarry" Content="Előző havi maradvány másolása bejövő óraként"
                             Click="BtnCopyPrevCarry_Click" />
                 </StackPanel>
+                <Button x:Name="BtnAutoFill" Content="Automatikus kitöltés" Style="{StaticResource AccentButton}"
+                        HorizontalAlignment="Left" Margin="0,0,0,10" Click="BtnAutoFill_Click" />
                 <UniformGrid Columns="4" Rows="3">
                     <Button x:Name="BtnMonth1" Content="Jan" Style="{StaticResource LinkButton}" Click="MonthButton_Click" />
                     <Button x:Name="BtnMonth2" Content="Feb" Style="{StaticResource LinkButton}" Click="MonthButton_Click" />

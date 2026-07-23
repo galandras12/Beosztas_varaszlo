@@ -57,6 +57,14 @@
                         android:text="Előző havi maradvány másolása" />
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/btnAutoFill"
+                    style="@style/Widget.Glass.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Automatikus kitöltés" />
+
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

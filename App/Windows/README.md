@@ -67,11 +67,37 @@ Teendők az első megnyitáskor:
 - Adatbázis mentése/betöltése JSON fájlba a bal oldali sáv alján, az alkalmazás saját
   helyi adatbázisa mellett kényelmi biztonsági mentésként/hordozhatóságként.
 
-## Ismert korlátok
+## Fordítási hibák Visual Studio alatt - hibaelhárítás
 
-- Ezt a modult nem sikerült ebben a munkakörnyezetben lefordítani/tesztelni (nincs .NET SDK,
-  nincs internet a Microsoft letöltési szervereihez) - Visual Studióban/`dotnet build`-del
-  való megnyitás után esetlegesen felmerülő fordítási hibákat jelezd vissza.
+Ebben a fejlesztői környezetben időközben sikerült telepíteni a valódi .NET 8 SDK-t, és
+azzal leellenőrizni a kódot: a WPF-független üzleti logika réteg (`Models`, `AppDatabaseService`,
+`AppRepository`, `HungarianHolidays`, `ScheduleCalculator`, `MinimalPdfWriter`, `PrintModels`,
+`PrintDocumentBuilder`) egy külön, sima `net8.0` class libraryben **hiba és figyelmeztetés
+nélkül lefordul**. A WPF-specifikus rész (`net8.0-windows`, `UseWPF=true`) tényleges
+fordítása Linuxon nem lehetséges - a `Microsoft.NET.Sdk.WindowsDesktop` build-eszközlánc
+(XAML→BAML fordító) kizárólag Windows-on érhető el -, ezért ezt a részt soronkénti, kézi
+átvizsgálással ellenőriztük: minden XAML fájl jólformázott, minden `x:Name` hivatkozás
+megfelel a code-behind fájlokban használt azonosítóknak, minden metódushívás paraméterezése
+egyezik a tényleges definíciókkal, és a kapcsos zárójelek/névterek mindenhol konzisztensek.
+Ezzel a módszerrel nem található valódi fordítási hiba a kódban.
+
+Ha Visual Studio mégis több hibakódot jelez és nem indul el a program, a leggyakoribb valódi
+okok - érdemes ezeket ellenőrizni:
+
+1. **Hiányzó "​.NET asztali fejlesztés" (".NET desktop development") workload.** Ez a
+   leggyakoribb ok: Visual Studio Installerben (nem magában a VS-ben!) ellenőrizd, hogy ez a
+   workload be van-e pipálva, és ha nem, telepítsd, majd indítsd újra Visual Studiót.
+2. **Nem a .NET 8 SDK van telepítve.** A `dotnet --version` parancsnak `8.x`-et kell mutatnia
+   (Visual Studio 2022 17.8 vagy újabb szükséges hozzá).
+3. **Elavult NuGet/MSBuild gyorsítótár** a korábbi, esetleg hibás állapotú lefordítási
+   kísérletekből: Visual Studióban "Build" → "Clean Solution", majd töröld kézzel a `bin/` és
+   `obj/` mappákat a `App/Windows/BeosztasVarazslo` alatt, és fordítsd újra.
+4. Ha ezek után is konkrét hibakódok (pl. `CS####`, `MC####`) jelennek meg, másold be a teljes
+   hibaüzenetet (Hiba lista/Error List ablak tartalmát) - anélkül a fenti általános
+   átvizsgálás a lehető legmesszebb ment el, amit egy Linux-alapú fejlesztői környezetben
+   (ahol maga a WPF fordító nem futtatható) el lehetett végezni.
+
+## Ismert korlátok
 - A Mica ablakháttér csak Windows 11 (22H2+) rendszeren, és ott is legfeljebb a natív
   címsor sávján válhat láthatóvá, mivel a tartalmi terület (kártyák, navigációs sáv)
   szándékosan átlátszatlan hátteret használ a régebbi Windows verziókon való biztonságos

@@ -63,6 +63,7 @@ class ScheduleFragment : Fragment() {
             }
         }
         binding.btnCopyPrevCarry.setOnClickListener { copyPreviousMonthCarry() }
+        binding.btnAutoFill.setOnClickListener { confirmAutoFill() }
 
         highlightMonthButtons()
         rebuildGrid()
@@ -288,6 +289,39 @@ class ScheduleFragment : Fragment() {
             }
             rebuildGrid()
             toast("Előző havi (${AppRepository.MONTH_NAMES[pm - 1]} $py) egyenleg átmásolva bejövő óraként.")
+        }
+    }
+
+    private fun confirmAutoFill() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Automatikus kitöltés")
+            .setMessage(
+                "Automatikusan kitölti a(z) ${AppRepository.MONTH_NAMES[selMonth - 1]} $selYear hónap ÜRES celláit: " +
+                    "irodai csoportoknál minden munkanapra munkaórát ír, az egymást váltó (létszám-figyelt) csoportoknál pedig " +
+                    "a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra. A már kitöltött cellákat nem érinti. Folytatod?"
+            )
+            .setNegativeButton("Mégse", null)
+            .setPositiveButton("Igen") { _, _ -> runAutoFill() }
+            .show()
+    }
+
+    private fun runAutoFill() {
+        lifecycleScope.launch {
+            val result = repo().autoFillMonth(selYear, selMonth)
+            rebuildGrid()
+            when {
+                result.filledCells == 0 && result.shortfalls.isEmpty() ->
+                    toast("Nem volt kitöltendő üres cella ebben a hónapban.")
+                result.shortfalls.isEmpty() ->
+                    toast("${result.filledCells} cella automatikusan kitöltve.")
+                else -> {
+                    val details = result.shortfalls.take(5).joinToString("; ") {
+                        "${it.groupName} – ${it.day}. nap, ${it.shiftLabel}: ${it.assigned}/${it.needed} fő"
+                    }
+                    val more = if (result.shortfalls.size > 5) "; …" else ""
+                    toast("${result.filledCells} cella kitöltve, de ${result.shortfalls.size} esetben nem volt elég szabad/pihent dolgozó ($details$more).")
+                }
+            }
         }
     }
 

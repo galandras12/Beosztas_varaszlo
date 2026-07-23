@@ -55,6 +55,15 @@
             android:hint="Szükséges létszám egy műszakban (0 = nincs figyelve)"
             android:inputType="number" />
 
+        <EditText
+            android:id="@+id/etMinRestHours"
+            style="@style/Widget.Glass.EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="Min. pihenőidő egy műszak után (óra) - automatikus kitöltéshez"
+            android:inputType="number" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

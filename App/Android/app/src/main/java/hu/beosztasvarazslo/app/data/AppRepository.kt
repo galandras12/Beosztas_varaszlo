@@ -198,6 +198,106 @@ class AppRepository(private val db: AppDatabase) {
         return best
     }
 
+    /** Egy hiányzó lefedettség egy adott napon/műszakon, automatikus kitöltés után. */
+    data class AutoFillShortfall(val groupName: String, val day: Int, val shiftLabel: String, val needed: Int, val assigned: Int)
+
+    /** Az automatikus kitöltés eredménye. */
+    data class AutoFillResult(val filledCells: Int, val shortfalls: List<AutoFillShortfall>)
+
+    /**
+     * Automatikus beosztás-kitöltő. Csak ÜRES cellákba ír - meglévő (kézzel beírt vagy korábban
+     * generált) kódokat sosem ír felül.
+     * - Irodai (hétfő-péntek) csoportoknál: minden munkanapon minden dolgozóhoz "M" kódot ír.
+     * - Egymást váltó, létszám-figyelt (staffPerShift > 0) csoportoknál: napról napra,
+     *   műszaktípusonként annyi szabad, a csoport `minRestHours` pihenőidejét betartó dolgozót
+     *   jelöl ki, ameddig a szükséges létszám meg nem telik - a legkevesebb eddig ledolgozott
+     *   órájú (méltányos terheléselosztás), egyformaság esetén névsor szerinti dolgozókat
+     *   részesítve előnyben. Ha nincs elég szabad/pihent dolgozó, annyit oszt be, amennyi van,
+     *   és a hiányt jelzi.
+     */
+    suspend fun autoFillMonth(year: Int, month: Int): AutoFillResult {
+        val dim = ScheduleCalculator.daysInMonth(year, month)
+        val holidayMap = getHolidayMap(year)
+        var filledCells = 0
+        val shortfalls = mutableListOf<AutoFillShortfall>()
+
+        for (gws in getGroupsWithShiftTypes()) {
+            val group = gws.group
+            val groupEmployees = getEmployeesForGroup(group.id)
+            if (groupEmployees.isEmpty()) continue
+
+            if (group.type == GROUP_TYPE_OFFICE) {
+                for (emp in groupEmployees) {
+                    val codes = getMonthCodes(emp.id, year, month)
+                    for (d in 1..dim) {
+                        if (!ScheduleCalculator.isOfficeWorkday(holidayMap, year, month, d)) continue
+                        if (!codes[d].isNullOrEmpty()) continue
+                        setCell(emp.id, year, month, d, "M")
+                        filledCells++
+                    }
+                }
+                continue
+            }
+
+            if (group.staffPerShift > 0 && gws.shiftTypes.isNotEmpty()) {
+                val minRestDays = Math.ceil(group.minRestHours / 24.0).toInt()
+                val codesByEmployee = groupEmployees.associate { it.id to getMonthCodes(it.id, year, month).toMutableMap() }
+                val lastWorkedDay = HashMap<Long, Int>()
+                val shiftCount = HashMap<Long, Int>()
+                groupEmployees.forEach { emp ->
+                    lastWorkedDay[emp.id] = Int.MIN_VALUE
+                    shiftCount[emp.id] = 0
+                    val codes = codesByEmployee.getValue(emp.id)
+                    for (d in 1..dim) {
+                        val code = codes[d]
+                        if (code != null && gws.shiftTypes.any { it.code == code }) {
+                            lastWorkedDay[emp.id] = d
+                            shiftCount[emp.id] = shiftCount.getValue(emp.id) + 1
+                        }
+                    }
+                }
+
+                for (d in 1..dim) {
+                    val assignedToday = HashSet<Long>()
+                    groupEmployees.forEach { emp ->
+                        if (!codesByEmployee.getValue(emp.id)[d].isNullOrEmpty()) assignedToday.add(emp.id)
+                    }
+
+                    for (st in gws.shiftTypes) {
+                        val existingCount = groupEmployees.count { codesByEmployee.getValue(it.id)[d] == st.code }
+                        val needed = (group.staffPerShift - existingCount).coerceAtLeast(0)
+                        if (needed == 0) continue
+
+                        val candidates = groupEmployees.filter { emp ->
+                            if (assignedToday.contains(emp.id)) return@filter false
+                            if (!codesByEmployee.getValue(emp.id)[d].isNullOrEmpty()) return@filter false
+                            val last = lastWorkedDay.getValue(emp.id)
+                            last == Int.MIN_VALUE || (d - last) > minRestDays
+                        }.sortedWith(compareBy({ shiftCount.getValue(it.id) }, { it.name }))
+
+                        val toAssign = candidates.take(needed)
+                        toAssign.forEach { emp ->
+                            setCell(emp.id, year, month, d, st.code)
+                            codesByEmployee.getValue(emp.id)[d] = st.code
+                            assignedToday.add(emp.id)
+                            lastWorkedDay[emp.id] = d
+                            shiftCount[emp.id] = shiftCount.getValue(emp.id) + 1
+                            filledCells++
+                        }
+
+                        if (toAssign.size < needed) {
+                            shortfalls.add(
+                                AutoFillShortfall(group.name, d, "${st.label} (${st.code})", group.staffPerShift, existingCount + toAssign.size)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        return AutoFillResult(filledCells, shortfalls)
+    }
+
     // ---------- JSON export / import (biztonsági mentés, hordozhatóság) ----------
     // A tényleges "adatbázis" maga a Room által kezelt, titkosítatlan SQLite fájl
     // (lásd AppDatabase.databaseFile) - ez a JSON csak kényelmi export/import formátum.
@@ -212,6 +312,7 @@ class AppRepository(private val db: AppDatabase) {
             val jg = JSONObject()
                 .put("id", g.id).put("name", g.name).put("type", g.type)
                 .put("dailyHours", g.dailyHours).put("staffPerShift", g.staffPerShift)
+                .put("minRestHours", g.minRestHours)
             val stArr = JSONArray()
             gws.shiftTypes.forEach { st ->
                 stArr.put(JSONObject().put("code", st.code).put("label", st.label).put("hours", st.hours))
@@ -294,7 +395,8 @@ class AppRepository(private val db: AppDatabase) {
                             name = jg.getString("name"),
                             type = jg.getString("type"),
                             dailyHours = jg.getDouble("dailyHours"),
-                            staffPerShift = jg.optInt("staffPerShift", 0)
+                            staffPerShift = jg.optInt("staffPerShift", 0),
+                            minRestHours = jg.optInt("minRestHours", 24)
                         )
                     )
                     groupIdMap[oldId] = newId

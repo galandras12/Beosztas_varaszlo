@@ -44,6 +44,7 @@ public partial class GroupsView : UserControl, IRefreshableView
         {
             Text = $"Napi óraszám: {group.DailyHours} óra · Műszakok: {(string.IsNullOrEmpty(shiftDesc) ? "—" : shiftDesc)}" +
                    (group.StaffPerShift > 0 ? $" · Létszám/műszak: {group.StaffPerShift} fő" : "") +
+                   (group.Type == GroupTypes.General ? $" · Min. pihenőidő: {group.MinRestHours} óra" : "") +
                    $" · Dolgozók: {empCount} fő",
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 4, 0, 10),

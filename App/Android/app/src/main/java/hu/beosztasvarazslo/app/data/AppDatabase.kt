@@ -15,7 +15,7 @@ import androidx.room.RoomDatabase
         ScheduleEntryEntity::class, CarryOverEntity::class, MonthHoursEntity::class,
         HolidayExtraEntity::class, HolidayRemovedEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,6 +36,9 @@ abstract class AppDatabase : RoomDatabase() {
         fun getInstance(context: Context): AppDatabase =
             instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, DB_NAME)
+                    // Nincs éles, publikált adat, amit meg kellene őrizni verzióváltáskor -
+                    // sémaváltozás esetén egyszerűen újra létrejön az adatbázis.
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }
             }

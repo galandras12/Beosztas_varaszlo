@@ -14,7 +14,9 @@ data class WorkGroupEntity(
     val type: String,
     val dailyHours: Double,
     /** Egy műszakban szükséges létszám; 0 = nincs figyelve. */
-    val staffPerShift: Int
+    val staffPerShift: Int,
+    /** Automatikus kitöltésnél megkövetelt min. pihenőidő (óra) egy műszak után. */
+    val minRestHours: Int = 24
 )
 
 /** Egy munkacsoporton belüli műszaktípus (pl. Nappal/Éjszaka az ápolóknál). */

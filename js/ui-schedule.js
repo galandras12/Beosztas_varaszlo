@@ -295,12 +295,45 @@
     UI.toast('Előző havi (' + DB.MONTH_NAMES[prevMonth - 1] + ' ' + prevYear + ') egyenleg átmásolva bejövő óraként.', 'success');
   }
 
+  function autoFillMonth() {
+    const UI = global.App.UI;
+    const DB = global.App.DB;
+    const Calc = global.App.Calc;
+    const state = DB.getState();
+
+    UI.confirmDialog(
+      'Automatikusan kitölti a(z) ' + DB.MONTH_NAMES[selMonth - 1] + ' ' + selYear + ' hónap ÜRES celláit: ' +
+      'irodai csoportoknál minden munkanapra munkaórát ír, az egymást váltó (létszám-figyelt) csoportoknál pedig ' +
+      'a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra. A már kitöltött cellákat nem érinti. Folytatod?',
+      () => {
+        const result = Calc.autoFillMonth(state, selYear, selMonth);
+        DB.save();
+        renderScheduleTable();
+        if (result.filledCells === 0 && result.shortfalls.length === 0) {
+          UI.toast('Nem volt kitöltendő üres cella ebben a hónapban.', 'success');
+        } else if (result.shortfalls.length === 0) {
+          UI.toast(result.filledCells + ' cella automatikusan kitöltve.', 'success');
+        } else {
+          const details = result.shortfalls.slice(0, 5).map(s =>
+            s.group + ' – ' + s.day + '. nap, ' + s.shiftLabel + ': ' + s.assigned + '/' + s.needed + ' fő'
+          ).join('; ');
+          UI.toast(
+            result.filledCells + ' cella kitöltve, de ' + result.shortfalls.length + ' esetben nem volt elég szabad/pihent dolgozó (' +
+            details + (result.shortfalls.length > 5 ? '; …' : '') + ').',
+            'error'
+          );
+        }
+      }
+    );
+  }
+
   function wireEvents() {
     document.getElementById('schYear').addEventListener('change', (e) => {
       selYear = Number(e.target.value) || selYear;
       render();
     });
     document.getElementById('btnCopyPrevCarry').addEventListener('click', copyPrevMonthCarry);
+    document.getElementById('btnAutoFill').addEventListener('click', autoFillMonth);
   }
 
   function getSelection() { return { year: selYear, month: selMonth }; }

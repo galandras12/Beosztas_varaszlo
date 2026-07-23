@@ -36,6 +36,7 @@ public partial class GroupEditWindow : Window
             RbGeneral.IsChecked = _existing.Type != GroupTypes.Office;
             TxtDailyHours.Text = FormatNum(_existing.DailyHours);
             TxtStaffPerShift.Text = _existing.StaffPerShift.ToString();
+            TxtMinRestHours.Text = _existing.MinRestHours.ToString();
 
             if (_existing.ShiftTypes.Count == 0)
                 AddShiftRow("M", "Munka", FormatNum(_existing.DailyHours));
@@ -46,6 +47,7 @@ public partial class GroupEditWindow : Window
         {
             TxtDailyHours.Text = "8";
             TxtStaffPerShift.Text = "0";
+            TxtMinRestHours.Text = "24";
             AddShiftRow("M", "Munka", "8");
         }
         SyncForType();
@@ -94,6 +96,8 @@ public partial class GroupEditWindow : Window
     {
         bool isOffice = RbOffice.IsChecked == true;
         BtnAddShiftType.Visibility = isOffice ? Visibility.Collapsed : Visibility.Visible;
+        TxtMinRestLabel.Visibility = isOffice ? Visibility.Collapsed : Visibility.Visible;
+        TxtMinRestHours.Visibility = isOffice ? Visibility.Collapsed : Visibility.Visible;
 
         if (isOffice)
         {
@@ -123,6 +127,7 @@ public partial class GroupEditWindow : Window
         var type = RbOffice.IsChecked == true ? GroupTypes.Office : GroupTypes.General;
         var dailyHours = double.TryParse(TxtDailyHours.Text, out var dh) ? dh : 0;
         var staffPerShift = int.TryParse(TxtStaffPerShift.Text, out var sps) ? sps : 0;
+        var minRestHours = int.TryParse(TxtMinRestHours.Text, out var mrh) && mrh >= 0 ? mrh : 24;
 
         var shiftTypes = new List<ShiftType>();
         foreach (var row in _shiftRows)
@@ -149,6 +154,7 @@ public partial class GroupEditWindow : Window
             Type = type,
             DailyHours = dailyHours,
             StaffPerShift = staffPerShift,
+            MinRestHours = minRestHours,
             ShiftTypes = shiftTypes
         };
         DialogResult = true;

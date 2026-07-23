@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import hu.beosztasvarazslo.app.data.GroupWithShiftTypes
 import hu.beosztasvarazslo.app.databinding.ItemGroupBinding
+import hu.beosztasvarazslo.app.logic.GROUP_TYPE_GENERAL
 import hu.beosztasvarazslo.app.logic.GROUP_TYPE_OFFICE
 
 data class GroupRow(val gws: GroupWithShiftTypes, val employeeCount: Int)
@@ -38,6 +39,7 @@ class GroupAdapter(
         holder.binding.tvGroupDetails.text = buildString {
             append("Napi óraszám: ${g.dailyHours} óra · Műszakok: ").append(shiftDesc.ifEmpty { "—" })
             if (g.staffPerShift > 0) append(" · Létszám/műszak: ${g.staffPerShift} fő")
+            if (g.type == GROUP_TYPE_GENERAL) append(" · Min. pihenőidő: ${g.minRestHours} óra")
             append(" · Dolgozók: ${row.employeeCount} fő")
         }
         holder.binding.btnEditGroup.setOnClickListener { onEdit(row.gws) }

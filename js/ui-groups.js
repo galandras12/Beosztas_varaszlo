@@ -17,6 +17,7 @@
       card.appendChild(UI.el('p', { class: 'hint' }, [
         'Napi óraszám: ' + group.dailyHours + ' óra · Műszakok: ' + (shiftDesc || '—') +
         (group.staffPerShift ? (' · Egy műszakban szükséges létszám: ' + group.staffPerShift + ' fő') : '') +
+        (group.type === 'altalanos' ? (' · Min. pihenőidő 12 órás műszak után: ' + (group.minRestHours != null ? group.minRestHours : 24) + ' óra') : '') +
         ' · Dolgozók: ' + empCount + ' fő'
       ]));
       const row = UI.el('div', { class: 'row' });
@@ -62,7 +63,7 @@
     const DB = global.App.DB;
     const state = DB.getState();
     const isNew = !group;
-    const g = group || { id: DB.uid('grp'), name: '', type: 'altalanos', dailyHours: 8, staffPerShift: 0, shiftTypes: [{ code: 'M', label: 'Munka', hours: 8 }] };
+    const g = group || { id: DB.uid('grp'), name: '', type: 'altalanos', dailyHours: 8, staffPerShift: 0, minRestHours: 24, shiftTypes: [{ code: 'M', label: 'Munka', hours: 8 }] };
 
     const body = document.createElement('div');
     body.innerHTML =
@@ -74,6 +75,7 @@
       '</select></label>' +
       '<label>Napi óraszám (egy műszak/munkanap hossza)<input type="number" id="gDailyHours" value="' + g.dailyHours + '"></label>' +
       '<label>Szükséges létszám egy műszakban (0 = nincs figyelve)<input type="number" id="gStaffPerShift" value="' + (g.staffPerShift || 0) + '"></label>' +
+      '<label id="gMinRestWrap">Min. pihenőidő egy műszak után (óra) - automatikus kitöltéshez<input type="number" id="gMinRestHours" min="0" step="1" value="' + (g.minRestHours != null ? g.minRestHours : 24) + '"></label>' +
       '</div>' +
       '<h3 style="margin-top:1em">Műszaktípusok (iroda esetén automatikusan 1 típus)</h3>' +
       '<div id="shiftTypesEditor">' + shiftTypesEditorHtml(g.shiftTypes && g.shiftTypes.length ? g.shiftTypes : [{ code: 'M', label: 'Munka', hours: g.dailyHours }]) + '</div>' +
@@ -86,10 +88,12 @@
         const typeSelect = box.querySelector('#gType');
         const editor = box.querySelector('#shiftTypesEditor');
         const addBtn = box.querySelector('#btnAddShiftType');
+        const minRestWrap = box.querySelector('#gMinRestWrap');
 
         function syncForType() {
           const isOffice = typeSelect.value === 'iroda';
           addBtn.style.display = isOffice ? 'none' : '';
+          minRestWrap.style.display = isOffice ? 'none' : '';
           box.querySelectorAll('.shift-type-row .st-remove').forEach(b => b.style.display = isOffice ? 'none' : '');
           if (isOffice) {
             const dh = Number(box.querySelector('#gDailyHours').value) || 8;
@@ -107,6 +111,8 @@
         addBtn.addEventListener('click', () => {
           editor.insertAdjacentHTML('beforeend', shiftTypesEditorHtml([{ code: '', label: '', hours: g.dailyHours }]));
         });
+
+        syncForType();
       },
       actions: [
         { label: 'Mégse' },
@@ -118,13 +124,14 @@
             const type = document.getElementById('gType').value;
             const dailyHours = Number(document.getElementById('gDailyHours').value) || 0;
             const staffPerShift = Number(document.getElementById('gStaffPerShift').value) || 0;
+            const minRestHours = Math.max(0, Number(document.getElementById('gMinRestHours').value) || 0);
             const box = document.querySelector('.modal-box');
             let shiftTypes = readShiftTypesFromForm(box);
             if (type === 'iroda') shiftTypes = [{ code: 'M', label: 'Munka', hours: dailyHours }];
             if (!shiftTypes.length) { UI.toast('Legalább egy műszaktípus szükséges.', 'error'); return; }
 
             g.name = name; g.type = type; g.dailyHours = dailyHours;
-            g.staffPerShift = staffPerShift; g.shiftTypes = shiftTypes;
+            g.staffPerShift = staffPerShift; g.minRestHours = minRestHours; g.shiftTypes = shiftTypes;
             if (isNew) state.groups.push(g);
             DB.save();
             close();

@@ -22,6 +22,10 @@
             <TextBlock Text="Szükséges létszám egy műszakban (0 = nincs figyelve)" Style="{StaticResource HintText}" Margin="0,0,0,4" />
             <TextBox x:Name="TxtStaffPerShift" Margin="0,0,0,14" />
 
+            <TextBlock x:Name="TxtMinRestLabel" Text="Min. pihenőidő egy műszak után (óra) - automatikus kitöltéshez"
+                       Style="{StaticResource HintText}" Margin="0,0,0,4" />
+            <TextBox x:Name="TxtMinRestHours" Margin="0,0,0,14" />
+
             <TextBlock Text="Műszaktípusok" Style="{StaticResource SectionTitle}" />
             <StackPanel x:Name="ShiftTypesPanel" Margin="0,0,0,6" />
             <Button x:Name="BtnAddShiftType" Content="+ Új műszaktípus" Style="{StaticResource LinkButton}"

@@ -32,6 +32,9 @@ public class WorkGroup
 
     /// <summary>Egy műszakban szükséges létszám; 0 = nincs figyelve.</summary>
     public int StaffPerShift { get; set; }
+
+    /// <summary>Automatikus kitöltésnél megkövetelt min. pihenőidő (óra) egy műszak után.</summary>
+    public int MinRestHours { get; set; } = 24;
     public List<ShiftType> ShiftTypes { get; set; } = new();
 }
 

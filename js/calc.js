@@ -165,11 +165,115 @@
     return best;
   }
 
+  /**
+   * Automatikus beosztás-kitöltő. Csak ÜRES cellákba ír - meglévő (kézzel beírt vagy korábban
+   * generált) kódokat sosem ír felül.
+   * - Irodai (hétfő-péntek) csoportoknál: minden munkanapon (hétvége/ünnepnap kivételével)
+   *   minden dolgozóhoz "M" (munka) kódot ír.
+   * - Egymást váltó, létszám-figyelt (staffPerShift > 0) csoportoknál: napról napra, műszaktípusonként
+   *   annyi szabad (aznapra még be nem osztott, és a csoport `minRestHours` mezőjében megadott
+   *   pihenőidőt betartó) dolgozót jelöl ki, ameddig a szükséges létszám meg nem telik - a
+   *   legkevesebb eddig ledolgozott órájú (méltányos terheléselosztás), egyformaság esetén
+   *   névsor szerinti dolgozókat részesítve előnyben. Ha nincs elég szabad/pihent dolgozó,
+   *   annyit oszt be, amennyi van, és figyelmeztetésben jelzi a hiányt (a lefedettség-kijelző
+   *   ez esetben is jelezni fogja pirossal/narancssal).
+   * @returns {{ filledCells:number, shortfalls: Array<{group:string, day:number, shiftLabel:string, needed:number, assigned:number}> }}
+   */
+  function autoFillMonth(state, year, month) {
+    const dim = daysInMonth(year, month);
+    let filledCells = 0;
+    const shortfalls = [];
+
+    (state.groups || []).forEach(group => {
+      const groupEmployees = state.employees.filter(e => e.groupId === group.id);
+      if (groupEmployees.length === 0) return;
+
+      if (group.type === 'iroda') {
+        for (let d = 1; d <= dim; d++) {
+          if (!isOfficeWorkday(state, year, month, d)) continue;
+          groupEmployees.forEach(emp => {
+            const existing = getCell(state, year, month, emp.id, d);
+            if (existing) return;
+            setCell(state, year, month, emp.id, d, 'M');
+            filledCells++;
+          });
+        }
+        return;
+      }
+
+      if (group.staffPerShift > 0 && (group.shiftTypes || []).length > 0) {
+        const minRestHours = group.minRestHours != null ? group.minRestHours : 24;
+        const minRestDays = Math.ceil(minRestHours / 24);
+
+        const lastWorkedDay = {};
+        const shiftCount = {};
+        groupEmployees.forEach(emp => {
+          lastWorkedDay[emp.id] = -Infinity;
+          shiftCount[emp.id] = 0;
+          for (let d = 1; d <= dim; d++) {
+            const code = getCell(state, year, month, emp.id, d);
+            if (code && getShiftTypeByCode(group, code)) {
+              lastWorkedDay[emp.id] = d;
+              shiftCount[emp.id]++;
+            }
+          }
+        });
+
+        for (let d = 1; d <= dim; d++) {
+          const assignedToday = new Set();
+          groupEmployees.forEach(emp => {
+            const existing = getCell(state, year, month, emp.id, d);
+            if (existing) assignedToday.add(emp.id);
+          });
+
+          group.shiftTypes.forEach(st => {
+            let existingCount = 0;
+            groupEmployees.forEach(emp => {
+              if (getCell(state, year, month, emp.id, d) === st.code) existingCount++;
+            });
+            const needed = Math.max(0, group.staffPerShift - existingCount);
+            if (needed === 0) return;
+
+            const candidates = groupEmployees.filter(emp => {
+              if (assignedToday.has(emp.id)) return false;
+              const existing = getCell(state, year, month, emp.id, d);
+              if (existing) return false;
+              const last = lastWorkedDay[emp.id];
+              return last === -Infinity || (d - last) > minRestDays;
+            }).sort((a, b) => {
+              const diff = shiftCount[a.id] - shiftCount[b.id];
+              if (diff !== 0) return diff;
+              return (a.name || '').localeCompare(b.name || '', 'hu');
+            });
+
+            const toAssign = candidates.slice(0, needed);
+            toAssign.forEach(emp => {
+              setCell(state, year, month, emp.id, d, st.code);
+              assignedToday.add(emp.id);
+              lastWorkedDay[emp.id] = d;
+              shiftCount[emp.id]++;
+              filledCells++;
+            });
+
+            if (toAssign.length < needed) {
+              shortfalls.push({
+                group: group.name, day: d, shiftLabel: st.label + ' (' + st.code + ')',
+                needed: group.staffPerShift, assigned: existingCount + toAssign.length
+              });
+            }
+          });
+        }
+      }
+    });
+
+    return { filledCells, shortfalls };
+  }
+
   global.App = global.App || {};
   global.App.Calc = {
     daysInMonth, isWeekend, getHolidayMap, isHoliday, isOfficeWorkday,
     getShiftTypeByCode, getCell, setCell, getCarryIn, setCarryIn,
     cellHours, summarizeEmployeeMonth, yearVacationUsed, shiftCoverage,
-    findSickSubstitute
+    findSickSubstitute, autoFillMonth
   };
 })(window);

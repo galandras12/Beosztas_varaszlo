@@ -259,4 +259,112 @@ public class AppRepository
         if (best != null) SetCell(best.Id, year, month, day, shiftCode);
         return best;
     }
+
+    public record AutoFillShortfall(string Group, int Day, string ShiftLabel, int Needed, int Assigned);
+    public record AutoFillResult(int FilledCells, List<AutoFillShortfall> Shortfalls);
+
+    /// <summary>
+    /// Automatikus beosztás-kitöltő. Csak ÜRES cellákba ír - meglévő (kézzel beírt vagy korábban
+    /// generált) kódokat sosem ír felül.
+    /// - Irodai (hétfő-péntek) csoportoknál: minden munkanapon minden dolgozóhoz "M" kódot ír.
+    /// - Egymást váltó, létszám-figyelt (StaffPerShift > 0) csoportoknál: napról napra,
+    ///   műszaktípusonként annyi szabad, a csoport MinRestHours pihenőidejét betartó dolgozót
+    ///   jelöl ki, ameddig a szükséges létszám meg nem telik - a legkevesebb eddig ledolgozott
+    ///   órájú, egyformaság esetén névsor szerinti dolgozókat részesítve előnyben. Ha nincs elég
+    ///   szabad/pihent dolgozó, annyit oszt be, amennyi van, és a hiányt jelzi.
+    /// </summary>
+    public AutoFillResult AutoFillMonth(int year, int month)
+    {
+        var dim = ScheduleCalculator.DaysInMonth(year, month);
+        var holidayMap = GetHolidayMap(year);
+        int filledCells = 0;
+        var shortfalls = new List<AutoFillShortfall>();
+
+        foreach (var group in GetGroupsSorted())
+        {
+            var groupEmployees = GetEmployeesForGroup(group.Id);
+            if (groupEmployees.Count == 0) continue;
+
+            if (group.Type == GroupTypes.Office)
+            {
+                foreach (var emp in groupEmployees)
+                {
+                    var codes = GetMonthCodes(emp.Id, year, month);
+                    for (int d = 1; d <= dim; d++)
+                    {
+                        if (!ScheduleCalculator.IsOfficeWorkday(holidayMap, year, month, d)) continue;
+                        if (codes.TryGetValue(d, out var existing) && !string.IsNullOrEmpty(existing)) continue;
+                        SetCell(emp.Id, year, month, d, "M");
+                        filledCells++;
+                    }
+                }
+                continue;
+            }
+
+            if (group.StaffPerShift > 0 && group.ShiftTypes.Count > 0)
+            {
+                int minRestDays = (int)Math.Ceiling(group.MinRestHours / 24.0);
+                var codesByEmployee = groupEmployees.ToDictionary(e => e.Id, e => GetMonthCodes(e.Id, year, month));
+                var lastWorkedDay = new Dictionary<long, int>();
+                var shiftCount = new Dictionary<long, int>();
+
+                foreach (var emp in groupEmployees)
+                {
+                    lastWorkedDay[emp.Id] = int.MinValue;
+                    shiftCount[emp.Id] = 0;
+                    var codes = codesByEmployee[emp.Id];
+                    for (int d = 1; d <= dim; d++)
+                    {
+                        if (codes.TryGetValue(d, out var code) && group.ShiftTypes.Any(st => st.Code == code))
+                        {
+                            lastWorkedDay[emp.Id] = d;
+                            shiftCount[emp.Id]++;
+                        }
+                    }
+                }
+
+                for (int d = 1; d <= dim; d++)
+                {
+                    var assignedToday = new HashSet<long>();
+                    foreach (var emp in groupEmployees)
+                        if (codesByEmployee[emp.Id].TryGetValue(d, out var existing) && !string.IsNullOrEmpty(existing))
+                            assignedToday.Add(emp.Id);
+
+                    foreach (var st in group.ShiftTypes)
+                    {
+                        int existingCount = groupEmployees.Count(e => codesByEmployee[e.Id].TryGetValue(d, out var c) && c == st.Code);
+                        int needed = Math.Max(0, group.StaffPerShift - existingCount);
+                        if (needed == 0) continue;
+
+                        var candidates = groupEmployees.Where(emp =>
+                        {
+                            if (assignedToday.Contains(emp.Id)) return false;
+                            if (codesByEmployee[emp.Id].TryGetValue(d, out var existing) && !string.IsNullOrEmpty(existing)) return false;
+                            var last = lastWorkedDay[emp.Id];
+                            return last == int.MinValue || (d - last) > minRestDays;
+                        })
+                        .OrderBy(e => shiftCount[e.Id])
+                        .ThenBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase)
+                        .ToList();
+
+                        var toAssign = candidates.Take(needed).ToList();
+                        foreach (var emp in toAssign)
+                        {
+                            SetCell(emp.Id, year, month, d, st.Code);
+                            codesByEmployee[emp.Id][d] = st.Code;
+                            assignedToday.Add(emp.Id);
+                            lastWorkedDay[emp.Id] = d;
+                            shiftCount[emp.Id]++;
+                            filledCells++;
+                        }
+
+                        if (toAssign.Count < needed)
+                            shortfalls.Add(new AutoFillShortfall(group.Name, d, $"{st.Label} ({st.Code})", group.StaffPerShift, existingCount + toAssign.Count));
+                    }
+                }
+            }
+        }
+
+        return new AutoFillResult(filledCells, shortfalls);
+    }
 }

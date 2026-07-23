@@ -324,6 +324,39 @@ public partial class ScheduleView : UserControl, IRefreshableView
             "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
+    private void BtnAutoFill_Click(object sender, RoutedEventArgs e)
+    {
+        var result = MessageBox.Show(Window.GetWindow(this),
+            $"Automatikusan kitölti a(z) {AppDatabaseService.MonthNames[_selMonth - 1]} {_selYear} hónap ÜRES celláit: " +
+            "irodai csoportoknál minden munkanapra munkaórát ír, az egymást váltó (létszám-figyelt) csoportoknál pedig " +
+            "a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra. A már kitöltött cellákat nem érinti. Folytatod?",
+            "Automatikus kitöltés", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result != MessageBoxResult.Yes) return;
+
+        var fillResult = _repo.AutoFillMonth(_selYear, _selMonth);
+        RebuildGrid();
+
+        if (fillResult.FilledCells == 0 && fillResult.Shortfalls.Count == 0)
+        {
+            MessageBox.Show(Window.GetWindow(this), "Nem volt kitöltendő üres cella ebben a hónapban.",
+                "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else if (fillResult.Shortfalls.Count == 0)
+        {
+            MessageBox.Show(Window.GetWindow(this), $"{fillResult.FilledCells} cella automatikusan kitöltve.",
+                "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+            var details = string.Join("; ", fillResult.Shortfalls.Take(5)
+                .Select(s => $"{s.Group} – {s.Day}. nap, {s.ShiftLabel}: {s.Assigned}/{s.Needed} fő"));
+            var more = fillResult.Shortfalls.Count > 5 ? "; …" : "";
+            MessageBox.Show(Window.GetWindow(this),
+                $"{fillResult.FilledCells} cella kitöltve, de {fillResult.Shortfalls.Count} esetben nem volt elég szabad/pihent dolgozó ({details}{more}).",
+                "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void RebuildCoverage(List<WorkGroup> groups, List<Employee> employees)
     {
         CoveragePanel.Children.Clear();
