@@ -119,14 +119,14 @@ class ScheduleFragment : Fragment() {
             val totalRowWidth = dim * dayColWidth + 5 * statColWidth
 
             // Fejléc sor
-            b.namesColumn.addView(cellTextView("Dolgozó", nameColWidth, R.color.border, bold = true).also { it.gravity = Gravity.CENTER_VERTICAL or Gravity.START })
+            b.namesColumn.addView(cellTextView("Dolgozó", nameColWidth, R.color.schedule_header_bg, bold = true).also { it.gravity = Gravity.CENTER_VERTICAL or Gravity.START })
             val headerRow = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL }
             for (d in 1..dim) {
                 val dow = dowLetters[java.time.LocalDate.of(selYear, selMonth, d).dayOfWeek.value % 7]
-                headerRow.addView(cellTextView("$d\n$dow", dayColWidth, R.color.border))
+                headerRow.addView(cellTextView("$d\n$dow", dayColWidth, R.color.schedule_header_bg))
             }
             listOf("Köt.ó", "Ledolg.ó", "Szab.nap", "Bejövő ó.", "Egyenleg").forEach {
-                headerRow.addView(cellTextView(it, statColWidth, R.color.border, bold = true))
+                headerRow.addView(cellTextView(it, statColWidth, R.color.schedule_header_bg, bold = true))
             }
             b.daysColumn.addView(headerRow)
 
@@ -320,9 +320,9 @@ class ScheduleFragment : Fragment() {
                 val leftCol = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
                 val rightCol = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
 
-                leftCol.addView(cellTextView("Műszak", nameColWidth, R.color.border, bold = true).also { it.gravity = Gravity.CENTER_VERTICAL or Gravity.START })
+                leftCol.addView(cellTextView("Műszak", nameColWidth, R.color.schedule_header_bg, bold = true).also { it.gravity = Gravity.CENTER_VERTICAL or Gravity.START })
                 val headerRow = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL }
-                for (d in 1..dim) headerRow.addView(cellTextView(d.toString(), dayColWidth, R.color.border))
+                for (d in 1..dim) headerRow.addView(cellTextView(d.toString(), dayColWidth, R.color.schedule_header_bg))
                 rightCol.addView(headerRow)
 
                 gws.shiftTypes.forEach { st ->

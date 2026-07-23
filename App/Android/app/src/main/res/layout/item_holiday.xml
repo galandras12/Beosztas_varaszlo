@@ -30,9 +30,8 @@
 
     <Button
         android:id="@+id/btnAction"
-        style="?attr/borderlessButtonStyle"
+        style="@style/Widget.Glass.Button.Link"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAllCaps="false" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

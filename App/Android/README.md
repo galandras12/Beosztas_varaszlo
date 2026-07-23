@@ -21,6 +21,20 @@ Teendők az első megnyitáskor:
    ezek Maven Centralról/Google Maven-ről érkeznek).
 4. Futtasd egy Android 8.0 (API 26) vagy újabb emulátoron/eszközön.
 
+## Kinézet – "Liquid Glass"
+
+Az alkalmazás megjelenése az Apple Liquid Glass dizájnnyelvét idézi: élénk, átlós
+színátmenetes háttér (`bg_liquid_gradient`), amely áttetszik a "fagyott üveg" jellegű
+felületeken - lekerekített, félig áttetsző fehér kártyák finom él-fénnyel (stroke) és felső
+fényreflexszel, kapszula alakú (pill) gombok, sötétebb üveges (áttetsző) felső eszköztár
+fehér szöveggel, és egy lebegő, lekerekített üveges navigációs sáv az alsó fülekhez (a
+kiválasztott fület egy kitöltött pill jelöli, nem aláhúzás). Ez a stílus a
+`res/values/styles.xml`-ben (`Widget.Glass.*`) és a `res/drawable/glass_*`,
+`bg_liquid_gradient` erőforrásokban van megvalósítva, kizárólag natív Android
+API-kkal/attribútumokkal (nincs valós idejű háttérelmosás, mert az API 31+ (Android 12)
+verziót igényelne; a minSdk 26 megtartása miatt az áttetszőség + lekerekítés + él-fény
+kombinációja adja az "üveg" hatást).
+
 ## Architektúra
 
 - **data/** – Room entitások, DAO-k, `AppDatabase` (egyetlen titkosítatlan SQLite fájl,

@@ -8,6 +8,7 @@
 
     <EditText
         android:id="@+id/etCode"
+        style="@style/Widget.Glass.EditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -15,6 +16,7 @@
 
     <EditText
         android:id="@+id/etLabel"
+        style="@style/Widget.Glass.EditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="2"
@@ -23,6 +25,7 @@
 
     <EditText
         android:id="@+id/etHours"
+        style="@style/Widget.Glass.EditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

@@ -3,32 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background">
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface">
+        android:background="@android:color/transparent"
+        android:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/surface"
-            android:elevation="2dp"
+            android:background="@drawable/glass_toolbar_bg"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
             app:title="@string/app_name"
-            app:titleTextColor="@color/text_primary" />
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabMode="scrollable"
-            app:tabGravity="start"
-            app:tabTextColor="@color/text_muted"
-            app:tabSelectedTextColor="@color/primary"
-            app:tabIndicatorColor="@color/primary" />
+            app:titleTextColor="@color/glass_text_on_dark" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager2.widget.ViewPager2
@@ -36,5 +26,31 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.Glass.Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="10dp">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@android:color/transparent"
+            app:tabMode="scrollable"
+            app:tabGravity="center"
+            app:tabTextColor="@color/text_muted"
+            app:tabSelectedTextColor="@android:color/white"
+            app:tabIndicator="@drawable/glass_tab_pill_indicator"
+            app:tabIndicatorGravity="center"
+            app:tabIndicatorFullWidth="false"
+            app:tabIndicatorAnimationMode="elastic"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabPaddingStart="4dp"
+            app:tabPaddingEnd="4dp" />
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

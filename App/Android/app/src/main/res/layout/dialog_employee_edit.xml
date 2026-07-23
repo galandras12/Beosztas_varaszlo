@@ -11,6 +11,7 @@
 
         <EditText
             android:id="@+id/etEmpName"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Név" />
@@ -30,6 +31,7 @@
 
         <EditText
             android:id="@+id/etFactor"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -38,6 +40,7 @@
 
         <EditText
             android:id="@+id/etMaxVacation"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -46,6 +49,7 @@
 
         <EditText
             android:id="@+id/etNotes"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

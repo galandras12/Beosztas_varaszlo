@@ -3,42 +3,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="12dp">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Glass.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:background="@color/surface">
+            app:cardCornerRadius="18dp">
 
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Szabadság-nyilvántartás éve"
-                android:textColor="@color/text_muted"
-                android:textSize="12sp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp">
 
-            <EditText
-                android:id="@+id/etVacationYear"
-                android:layout_width="110dp"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Szabadság-nyilvántartás éve"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/etVacationYear"
+                    style="@style/Widget.Glass.EditText"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/employeesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:padding="8dp"
+            android:paddingTop="12dp"
             android:clipToPadding="false" />
     </LinearLayout>
 
@@ -47,10 +55,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
+        android:layout_margin="24dp"
         android:contentDescription="Új dolgozó"
         android:src="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
-        app:backgroundTint="@color/primary" />
+        app:backgroundTint="@color/glass_primary_fill"
+        app:rippleColor="#40FFFFFF" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

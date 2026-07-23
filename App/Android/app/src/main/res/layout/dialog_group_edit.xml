@@ -12,6 +12,7 @@
 
         <EditText
             android:id="@+id/etGroupName"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Munkacsoport neve" />
@@ -38,6 +39,7 @@
 
         <EditText
             android:id="@+id/etDailyHours"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -46,6 +48,7 @@
 
         <EditText
             android:id="@+id/etStaffPerShift"
+            style="@style/Widget.Glass.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -68,11 +71,10 @@
 
         <Button
             android:id="@+id/btnAddShiftType"
-            style="?attr/borderlessButtonStyle"
+            style="@style/Widget.Glass.Button.Link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+ Új műszaktípus"
-            android:textAllCaps="false" />
+            android:text="+ Új műszaktípus" />
 
     </LinearLayout>
 </ScrollView>

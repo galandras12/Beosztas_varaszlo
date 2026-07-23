@@ -3,27 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@android:color/transparent"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Glass.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardElevation="1dp"
-            app:cardCornerRadius="8dp">
+            android:layout_marginBottom="14dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -38,10 +37,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="10dp">
 
                     <EditText
                         android:id="@+id/etYear"
+                        style="@style/Widget.Glass.EditText"
                         android:layout_width="110dp"
                         android:layout_height="wrap_content"
                         android:hint="Év"
@@ -49,49 +49,48 @@
 
                     <Button
                         android:id="@+id/btnCopyPrevCarry"
+                        style="@style/Widget.Glass.Button"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        android:text="Előző havi maradvány másolása"
-                        android:textAllCaps="false" />
+                        android:text="Előző havi maradvány másolása" />
                 </LinearLayout>
 
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:columnCount="4"
                     android:rowCount="3">
 
-                    <Button android:id="@+id/btnMonth1" style="?attr/borderlessButtonStyle" android:text="Jan" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth2" style="?attr/borderlessButtonStyle" android:text="Feb" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth3" style="?attr/borderlessButtonStyle" android:text="Már" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth4" style="?attr/borderlessButtonStyle" android:text="Ápr" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth5" style="?attr/borderlessButtonStyle" android:text="Máj" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth6" style="?attr/borderlessButtonStyle" android:text="Jún" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth7" style="?attr/borderlessButtonStyle" android:text="Júl" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth8" style="?attr/borderlessButtonStyle" android:text="Aug" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth9" style="?attr/borderlessButtonStyle" android:text="Sze" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth10" style="?attr/borderlessButtonStyle" android:text="Okt" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth11" style="?attr/borderlessButtonStyle" android:text="Nov" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth12" style="?attr/borderlessButtonStyle" android:text="Dec" android:textAllCaps="false" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth1" style="@style/Widget.Glass.Button.Link" android:text="Jan" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth2" style="@style/Widget.Glass.Button.Link" android:text="Feb" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth3" style="@style/Widget.Glass.Button.Link" android:text="Már" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth4" style="@style/Widget.Glass.Button.Link" android:text="Ápr" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth5" style="@style/Widget.Glass.Button.Link" android:text="Máj" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth6" style="@style/Widget.Glass.Button.Link" android:text="Jún" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth7" style="@style/Widget.Glass.Button.Link" android:text="Júl" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth8" style="@style/Widget.Glass.Button.Link" android:text="Aug" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth9" style="@style/Widget.Glass.Button.Link" android:text="Sze" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth10" style="@style/Widget.Glass.Button.Link" android:text="Okt" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth11" style="@style/Widget.Glass.Button.Link" android:text="Nov" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth12" style="@style/Widget.Glass.Button.Link" android:text="Dec" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
                 </GridLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Glass.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardElevation="1dp"
-            app:cardCornerRadius="8dp">
+            android:layout_marginBottom="14dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tvScheduleTitle"
@@ -137,16 +136,15 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Glass.Card"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardElevation="1dp"
-            app:cardCornerRadius="8dp">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="match_parent"
