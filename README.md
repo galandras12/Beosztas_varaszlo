@@ -1,44 +1,70 @@
 # Beosztás Varázsló
 
-Böngészőben futó, szerver nélküli munkabeosztás-készítő program HTML/CSS/JavaScript
-alapon. Nem igényel internetkapcsolatot, adatbázis-szervert vagy telepítést.
+Munkabeosztás-készítő program több munkaágra (pl. 12 órás váltásban dolgozó ápolók, 8 órás
+takarítók, 4 órás részmunkaidősök, hétfőtől péntekig dolgozó irodai munkatársak). A program
+három, egymástól független, de azonos funkciókészletet nyújtó formában készült el:
 
-## Használat
+| Verzió | Hol található | Technológia | Futtatás |
+|---|---|---|---|
+| 🌐 Böngészős | a repó gyökere (`index.html`) | HTML / CSS / JavaScript, nincs build lépés | nyisd meg `index.html`-t bármelyik böngészőben |
+| 🤖 Android | [`App/Android/`](App/Android/) | Kotlin, Room (SQLite) | Android Studio ([részletek](App/Android/README.md)) |
+| 🪟 Windows | [`App/Windows/`](App/Windows/) | .NET 8 / WPF | Visual Studio / `dotnet` ([részletek](App/Windows/README.md)) |
 
-Nyisd meg az `index.html` fájlt bármelyik modern böngészőben (Chrome, Edge,
-Firefox, Safari) – asztali gépen, laptopon vagy tableten egyaránt. Legegyszerűbb,
-ha az egész `Beosztas_varaszlo` mappát egy webszerverrel szolgálod ki (pl.
-`npx http-server .`), de dupla kattintással, közvetlenül fájlként megnyitva is
-működik.
+Mindhárom verzió szerver nélkül, kizárólag helyben fut, és saját, titkosítatlan, egyetlen
+fájlban tárolt adatbázissal dolgozik (böngészőben: `localStorage` + JSON export/import;
+Androidon: Room/SQLite fájl; Windowson: JSON fájl az `%AppData%` mappában).
 
-## Fülek
+## Közös funkciók
 
-1. **Beállítások** – a havi kötelező óraszám/munkanap alaptábla (Január: 176 óra
-   / 22 nap stb.) és a magyar munkaszüneti napok (automatikusan számolva,
-   egyénileg is szerkeszthetők).
-2. **Munkacsoportok** – tetszőleges munkaág létrehozása (pl. 12 órás váltásos
-   ápolók, 8 órás takarítók, 4 órás részmunkaidősök, hétfő-péntek irodaiak),
-   műszaktípusokkal és az egy műszakban szükséges létszámmal.
-3. **Dolgozók** – dolgozók felvétele munkacsoporthoz rendelve, munkaidő-arány
-   (teljes/rész) és a kötelezően megadandó, évi max. kiadható szabadságnapok
-   számának beállításával. A program nem enged ennél többet kiosztani.
-4. **Beosztás** – hónap kiválasztása, napi bontású beosztási rács. Irodai
-   dolgozóknál hétvégén/ünnepnapon automatikusan nincs munka. A "Bejövő óra"
-   oszlopba írható be kézzel, hogy egy dolgozó hány plusz (vagy mínusz) órával
-   kezdi a hónapot; az "Egyenleg/köv. hó" oszlop az aznapi maradékot mutatja,
-   ami a "Előző havi maradvány másolása" gombbal átvihető a következő hónapra.
-   Alul látható a műszak-lefedettség (hányan dolgoznak egy műszakban a
-   beállított elváráshoz képest).
-5. **Nyomtatás / Export** – A4 fekvő elrendezésű, munkakör szerint ABC sorrendbe
-   rendezett nyomtatható táblázat, a hónap számával és nevével a tetején, a
-   sorok végén a következő hónapra átvitt órákkal. Exportálható PDF-be és
-   JPG-be, illetve a böngésző nyomtatási funkciójával is kinyomtatható
-   (több oldalra törve, ha sok a dolgozó).
+Mindhárom verzió ugyanazt az öt fő területet fedi le:
 
-## Adattárolás
+1. **Beállítások** – a havi kötelező óraszám/munkanap alaptábla (Január: 176 óra / 22
+   munkanap, Február: 168 óra / 21 nap, ..., lásd az alábbi teljes táblázatot), valamint a
+   magyar munkaszüneti napok (automatikusan számolva, egyénileg is bővíthetők/kikapcsolhatók).
+2. **Munkacsoportok** – tetszőleges munkaág létrehozása (pl. 12 órás váltásos ápolók, 8 órás
+   takarítók, 4 órás részmunkaidősök, hétfő-péntek irodaiak), műszaktípusokkal és az egy
+   műszakban szükséges létszámmal (lefedettség-ellenőrzéshez).
+3. **Dolgozók** – felvétel munkacsoporthoz rendelve, munkaidő-arány (teljes/rész) és a
+   kötelezően megadandó, évi max. kiadható szabadságnapok számának beállításával. A program
+   sehol nem enged ennél több szabadságot kiosztani.
+4. **Beosztás** – hónap kiválasztása, napi bontású beosztási rács. Irodai dolgozóknál
+   hétvégén/ünnepnapon automatikusan nincs munkavégzés. Kézzel beírható, hogy egy dolgozó
+   hány plusz (vagy mínusz) órával kezdi a hónapot ("bejövő óra"); az automatikusan számolt
+   egyenleg egy gombbal átvihető a következő hónapra. Megjelenik a műszak-lefedettség is
+   (hányan dolgoznak egy műszakban a beállított elváráshoz képest).
+5. **Nyomtatás / Export** – A4 fekvő elrendezésű, munkakör szerint ABC sorrendbe rendezett
+   nyomtatható táblázat, a hónap számával/nevével a tetején, a sorok végén a következő
+   hónapra átvitt órákkal. Exportálható PDF-be (több oldalra törve, ha sok a dolgozó) és
+   JPG-be.
 
-Minden adat (munkacsoportok, dolgozók, beosztások, szabadságok) a böngésző
-`localStorage`-ában tárolódik, titkosítás és szerver nélkül. A fejlécben lévő
-**"Adatbázis mentése fájlba"** / **"Adatbázis betöltése fájlból"** gombokkal
-egyetlen JSON fájlba menthető, illetve visszatölthető a teljes adatbázis –
-ez szolgál biztonsági mentésként, illetve más eszközre való átvitelre.
+### Havi kötelező óraszám (alapérték)
+
+| Hónap | Óra | Munkanap | Hónap | Óra | Munkanap |
+|---|---|---|---|---|---|
+| Január | 176 | 22 | Július | 184 | 23 |
+| Február | 168 | 21 | Augusztus | 168 | 21 |
+| Március | 152 | 19 | Szeptember | 168 | 21 |
+| Április | 168 | 21 | Október | 176 | 22 |
+| Május | 168 | 21 | November | 160 | 20 |
+| Június | 160 | 20 | December | 160 | 20 |
+
+Ez az érték minden verzióban szerkeszthető, és egy teljes munkaidős dolgozóra vonatkozik –
+a munkaidő-arány (pl. részmunkaidő), a kivett szabadság/hiányzás, illetve az előző hónapról
+áthozott óra ezt módosítja a tényleges, dolgozónkénti kötelező óraszámhoz képest.
+
+## Melyik verziót érdemes használni?
+
+- **Böngészős**: a leggyorsabb kipróbálásra, bármilyen eszközön (telefon, tablet, gép)
+  azonnal fut, nincs telepítés.
+- **Android**: ha telefonon/tableten, alkalmazásként (internet nélkül is) szeretnéd
+  használni; lásd az [App/Android/README.md](App/Android/README.md) fájlt a fordítási
+  lépésekhez.
+- **Windows**: ha asztali gépen, natív, modern (Fluent-stílusú) Windows alkalmazásként
+  szeretnéd használni; lásd az [App/Windows/README.md](App/Windows/README.md) fájlt a
+  fordítási lépésekhez.
+
+Az Android és Windows verziót ebben a fejlesztői környezetben nem lehetett lefordítani és
+tesztelni (nincs Android SDK, illetve .NET SDK, és a hozzájuk tartozó letöltési szerverek
+sincsenek engedélyezve) – a böngészős verziót viszont teljeskörűen leteszteltem. A másik
+két verzió kódját gondosan átnéztem, de az első fordításnál esetlegesen felmerülő hibákat
+jelezd vissza.
