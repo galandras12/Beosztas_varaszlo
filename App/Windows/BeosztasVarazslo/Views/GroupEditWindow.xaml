@@ -1,0 +1,36 @@
+<Window x:Class="BeosztasVarazslo.Views.GroupEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Munkacsoport"
+        Width="480" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="720">
+        <StackPanel Margin="22">
+            <TextBlock Text="Munkacsoport neve" Style="{StaticResource HintText}" Margin="0,0,0,4" />
+            <TextBox x:Name="TxtName" Margin="0,0,0,14" />
+
+            <TextBlock Text="Típus" Style="{StaticResource HintText}" Margin="0,0,0,4" />
+            <RadioButton x:Name="RbGeneral" GroupName="GroupType" IsChecked="True" Checked="Type_Changed"
+                         Content="Általános (bármely nap, akár váltásos is)" />
+            <RadioButton x:Name="RbOffice" GroupName="GroupType" Checked="Type_Changed"
+                         Content="Iroda (hétfő-péntek, ünnepnap kivétel)" Margin="0,0,0,14" />
+
+            <TextBlock Text="Napi óraszám (egy műszak/munkanap hossza)" Style="{StaticResource HintText}" Margin="0,0,0,4" />
+            <TextBox x:Name="TxtDailyHours" Margin="0,0,0,14" LostFocus="TxtDailyHours_LostFocus" />
+
+            <TextBlock Text="Szükséges létszám egy műszakban (0 = nincs figyelve)" Style="{StaticResource HintText}" Margin="0,0,0,4" />
+            <TextBox x:Name="TxtStaffPerShift" Margin="0,0,0,14" />
+
+            <TextBlock Text="Műszaktípusok" Style="{StaticResource SectionTitle}" />
+            <StackPanel x:Name="ShiftTypesPanel" Margin="0,0,0,6" />
+            <Button x:Name="BtnAddShiftType" Content="+ Új műszaktípus" Style="{StaticResource LinkButton}"
+                    HorizontalAlignment="Left" Click="BtnAddShiftType_Click" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Mégse" Click="BtnCancel_Click" Margin="0,0,8,0" />
+                <Button Content="Mentés" Style="{StaticResource AccentButton}" Click="BtnSave_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <RootNamespace>BeosztasVarazslo</RootNamespace>
+    <AssemblyName>BeosztasVarazslo</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>AnyCPU;x64;arm64</Platforms>
+    <LangVersion>latest</LangVersion>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- Nincs külső NuGet-függőség: kizárólag a .NET / WPF beépített API-jait használja
+       (System.Text.Json az adattároláshoz, WPF renderelés a PDF/JPG exporthoz),
+       hogy a build a lehető legkevesebb hibaforrást tartalmazza. -->
+
+</Project>
