@@ -33,12 +33,24 @@
     </style>
 
     <style name="Widget.Glass.Button.Link" parent="Widget.Material3.Button.TextButton">
+        <item name="backgroundTint">@android:color/transparent</item>
         <item name="android:textColor">@color/primary</item>
         <item name="android:textAllCaps">false</item>
     </style>
 
     <style name="Widget.Glass.Button.Danger" parent="Widget.Glass.Button.Link">
         <item name="android:textColor">@color/danger</item>
+    </style>
+
+    <!-- Szűk, kis vízszintes térközű szövegesgomb-változat sűrű, több oszlopos rácsokhoz
+         (pl. a Beosztás fülön a 4 oszlopos hónapválasztó) - a Material3 alapértelmezett
+         (bőséges) gombkitöltés több oszlopnál egymásra csúszást okozhatna. -->
+    <style name="Widget.Glass.Button.Compact" parent="Widget.Glass.Button.Link">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">2dp</item>
+        <item name="android:paddingEnd">2dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
     </style>
 
     <!-- ===================== Beviteli mezők ===================== -->
