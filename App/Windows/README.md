@@ -75,7 +75,10 @@ Teendők az első megnyitáskor:
 - Nyomtatás/Export: A4 fekvő, munkakör szerint ABC sorrendben, a hónap számával/nevével, a
   sorok végén a következő hónapra átvitt órákkal - PDF (több oldalas) és JPG export.
 - Adatbázis mentése/betöltése JSON fájlba a bal oldali sáv alján, az alkalmazás saját
-  helyi adatbázisa mellett kényelmi biztonsági mentésként/hordozhatóságként.
+  helyi adatbázisa mellett kényelmi biztonsági mentésként/hordozhatóságként. Ez a JSON a
+  böngészős és az Android verzióval is közös, platformfüggetlen formátum
+  ("beosztas-varazslo-v1") - egy itt exportált beosztás bármelyik másik verzióban
+  importálható, és fordítva (lásd a gyökér README.md "Átjárhatóság" szakaszát).
 
 ## Fordítási hibák Visual Studio alatt - hibaelhárítás
 

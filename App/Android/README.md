@@ -66,7 +66,10 @@ fájlokban találhatók.
   a sorok végén a következő hónapra átvitt órákkal – PDF (több oldalas) és JPG export,
   megosztás más alkalmazásba (FileProvider).
 - Adatbázis mentése/betöltése JSON fájlba (Storage Access Framework), az app saját
-  Room adatbázisa mellett kényelmi biztonsági mentésként.
+  Room adatbázisa mellett kényelmi biztonsági mentésként. Ez a JSON a böngészős és a
+  Windows verzióval is közös, platformfüggetlen formátum ("beosztas-varazslo-v1") - egy
+  itt exportált beosztás bármelyik másik verzióban (vagy másik Android-eszközön)
+  importálható, és fordítva (lásd a gyökér README.md "Átjárhatóság" szakaszát).
 
 ## Ismert korlátok
 

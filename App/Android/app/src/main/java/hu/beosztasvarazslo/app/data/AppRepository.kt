@@ -339,19 +339,23 @@ class AppRepository(private val db: AppDatabase) {
         return AutoFillResult(filledCells, restCellsMarked, shortfalls)
     }
 
-    // ---------- JSON export / import (biztonsági mentés, hordozhatóság) ----------
+    // ---------- JSON export / import (közös, platformfüggetlen exportformátum) ----------
     // A tényleges "adatbázis" maga a Room által kezelt, titkosítatlan SQLite fájl
-    // (lásd AppDatabase.databaseFile) - ez a JSON csak kényelmi export/import formátum.
+    // (lásd AppDatabase.databaseFile) - ez a JSON az Android/Windows/böngészős verziók
+    // között is közös, lapos tömbökből álló csere-/biztonsági mentés formátum ("beosztas-
+    // varazslo-v1"): egy itt exportált fájl bármelyik platformon importálható, és fordítva.
 
     suspend fun exportToJson(): String {
         val root = JSONObject()
-        root.put("version", 1)
+        root.put("exportFormat", "beosztas-varazslo-v1")
+        root.put("generatedBy", "android")
+        root.put("generatedAt", java.time.Instant.now().toString())
 
         val groupsArr = JSONArray()
         getGroupsWithShiftTypes().forEach { gws ->
             val g = gws.group
             val jg = JSONObject()
-                .put("id", g.id).put("name", g.name).put("type", g.type)
+                .put("id", g.id.toString()).put("name", g.name).put("type", g.type)
                 .put("dailyHours", g.dailyHours).put("staffPerShift", g.staffPerShift)
                 .put("minRestHours", g.minRestHours)
             val stArr = JSONArray()
@@ -365,10 +369,12 @@ class AppRepository(private val db: AppDatabase) {
 
         val empArr = JSONArray()
         getEmployees().forEach { e ->
+            val exclArr = JSONArray()
+            e.excludedShiftCodeList().forEach { exclArr.put(it) }
             empArr.put(
-                JSONObject().put("id", e.id).put("name", e.name).put("groupId", e.groupId)
+                JSONObject().put("id", e.id.toString()).put("name", e.name).put("groupId", e.groupId.toString())
                     .put("employmentFactor", e.employmentFactor).put("maxVacationDays", e.maxVacationDays)
-                    .put("notes", e.notes).put("excludedShiftCodes", e.excludedShiftCodes)
+                    .put("notes", e.notes).put("excludedShiftCodes", exclArr)
             )
         }
         root.put("employees", empArr)
@@ -382,7 +388,7 @@ class AppRepository(private val db: AppDatabase) {
         val scheduleArr = JSONArray()
         scheduleDao.getAll().forEach { s ->
             scheduleArr.put(
-                JSONObject().put("employeeId", s.employeeId).put("year", s.year)
+                JSONObject().put("employeeId", s.employeeId.toString()).put("year", s.year)
                     .put("month", s.month).put("day", s.day).put("code", s.code)
             )
         }
@@ -391,7 +397,7 @@ class AppRepository(private val db: AppDatabase) {
         val carryArr = JSONArray()
         carryOverDao.getAll().forEach { c ->
             carryArr.put(
-                JSONObject().put("employeeId", c.employeeId).put("year", c.year)
+                JSONObject().put("employeeId", c.employeeId.toString()).put("year", c.year)
                     .put("month", c.month).put("hours", c.hours)
             )
         }
@@ -401,13 +407,13 @@ class AppRepository(private val db: AppDatabase) {
         holidayDao.getAllExtra().forEach { h ->
             extraArr.put(JSONObject().put("year", h.year).put("date", h.date).put("name", h.name))
         }
-        root.put("holidayExtra", extraArr)
+        root.put("holidaysExtra", extraArr)
 
         val removedArr = JSONArray()
         holidayDao.getAllRemoved().forEach { h ->
             removedArr.put(JSONObject().put("year", h.year).put("date", h.date))
         }
-        root.put("holidayRemoved", removedArr)
+        root.put("holidaysRemoved", removedArr)
 
         return root.toString(2)
     }
@@ -425,12 +431,14 @@ class AppRepository(private val db: AppDatabase) {
             db.withTransaction {
                 db.clearAllTables()
 
-                // régi (JSON-beli) csoport-id -> új, adatbázisban generált id
-                val groupIdMap = HashMap<Long, Long>()
+                // A más platformról (web/Windows) érkező azonosítók lehetnek szöveges (pl. "grp_xyz")
+                // vagy szám formájúak - az importálás mindig újat generál, és a JSON-beli azonosítót
+                // (szövegként kezelve, .toString()-gel) csak a kapcsolatok visszakötésére használja.
+                val groupIdMap = HashMap<String, Long>()
                 val groupsArr = root.getJSONArray("groups")
                 for (i in 0 until groupsArr.length()) {
                     val jg = groupsArr.getJSONObject(i)
-                    val oldId = jg.getLong("id")
+                    val oldId = jg.get("id").toString()
                     val newId = groupDao.insert(
                         WorkGroupEntity(
                             name = jg.getString("name"),
@@ -449,13 +457,18 @@ class AppRepository(private val db: AppDatabase) {
                     if (shiftTypes.isNotEmpty()) shiftTypeDao.insertAll(shiftTypes)
                 }
 
-                val employeeIdMap = HashMap<Long, Long>()
+                val employeeIdMap = HashMap<String, Long>()
                 val empArr = root.getJSONArray("employees")
                 for (i in 0 until empArr.length()) {
                     val je = empArr.getJSONObject(i)
-                    val oldId = je.getLong("id")
-                    val oldGroupId = je.getLong("groupId")
+                    val oldId = je.get("id").toString()
+                    val oldGroupId = je.get("groupId").toString()
                     val newGroupId = groupIdMap[oldGroupId] ?: continue
+                    val excludedCodes = if (je.has("excludedShiftCodes")) {
+                        val raw = je.get("excludedShiftCodes")
+                        if (raw is JSONArray) (0 until raw.length()).map { raw.getString(it) }
+                        else raw.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    } else emptyList()
                     val newId = employeeDao.insert(
                         EmployeeEntity(
                             name = je.getString("name"),
@@ -463,7 +476,7 @@ class AppRepository(private val db: AppDatabase) {
                             employmentFactor = je.optDouble("employmentFactor", 1.0),
                             maxVacationDays = je.getInt("maxVacationDays"),
                             notes = je.optString("notes", ""),
-                            excludedShiftCodes = je.optString("excludedShiftCodes", "")
+                            excludedShiftCodes = excludedCodes.toExcludedShiftCodesString()
                         )
                     )
                     employeeIdMap[oldId] = newId
@@ -482,7 +495,7 @@ class AppRepository(private val db: AppDatabase) {
                     val schArr = root.getJSONArray("schedule")
                     for (i in 0 until schArr.length()) {
                         val js = schArr.getJSONObject(i)
-                        val newEmpId = employeeIdMap[js.getLong("employeeId")] ?: continue
+                        val newEmpId = employeeIdMap[js.get("employeeId").toString()] ?: continue
                         scheduleDao.upsert(
                             ScheduleEntryEntity(
                                 employeeId = newEmpId, year = js.getInt("year"),
@@ -496,22 +509,24 @@ class AppRepository(private val db: AppDatabase) {
                     val coArr = root.getJSONArray("carryOvers")
                     for (i in 0 until coArr.length()) {
                         val jc = coArr.getJSONObject(i)
-                        val newEmpId = employeeIdMap[jc.getLong("employeeId")] ?: continue
+                        val newEmpId = employeeIdMap[jc.get("employeeId").toString()] ?: continue
                         carryOverDao.upsert(
                             CarryOverEntity(employeeId = newEmpId, year = jc.getInt("year"), month = jc.getInt("month"), hours = jc.getDouble("hours"))
                         )
                     }
                 }
 
-                if (root.has("holidayExtra")) {
-                    val heArr = root.getJSONArray("holidayExtra")
+                val extraKey = if (root.has("holidaysExtra")) "holidaysExtra" else "holidayExtra"
+                if (root.has(extraKey)) {
+                    val heArr = root.getJSONArray(extraKey)
                     for (i in 0 until heArr.length()) {
                         val jh = heArr.getJSONObject(i)
                         holidayDao.insertExtra(HolidayExtraEntity(year = jh.getInt("year"), date = jh.getString("date"), name = jh.getString("name")))
                     }
                 }
-                if (root.has("holidayRemoved")) {
-                    val hrArr = root.getJSONArray("holidayRemoved")
+                val removedKey = if (root.has("holidaysRemoved")) "holidaysRemoved" else "holidayRemoved"
+                if (root.has(removedKey)) {
+                    val hrArr = root.getJSONArray(removedKey)
                     for (i in 0 until hrArr.length()) {
                         val jh = hrArr.getJSONObject(i)
                         holidayDao.insertRemoved(HolidayRemovedEntity(year = jh.getInt("year"), date = jh.getString("date")))
