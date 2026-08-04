@@ -45,6 +45,7 @@ public partial class GroupEditWindow : Window
         }
         else
         {
+            RbGeneral.IsChecked = true;
             TxtDailyHours.Text = "8";
             TxtStaffPerShift.Text = "0";
             TxtMinRestHours.Text = "24";
