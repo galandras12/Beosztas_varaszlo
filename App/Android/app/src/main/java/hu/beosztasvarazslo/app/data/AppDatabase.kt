@@ -38,7 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                 instance ?: Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, DB_NAME)
                     // Nincs éles, publikált adat, amit meg kellene őrizni verzióváltáskor -
                     // sémaváltozás esetén egyszerűen újra létrejön az adatbázis.
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                     .also { instance = it }
             }

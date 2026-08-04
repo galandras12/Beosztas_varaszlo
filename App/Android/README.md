@@ -77,6 +77,21 @@ fájlokban találhatók.
   nagy létszámnál (több száz fő) lassulhat.
 - A Nyomtatás fülön a hónapválasztás független a Beosztás fültől (mindkettő saját
   év/hónap választóval rendelkezik).
-- Ezt a modult nem sikerült ebben a munkakörnyezetben lefordítani/tesztelni (nincs Android
-  SDK, nincs internet a Google szerverekhez) – Android Studióban való megnyitás után
-  esetlegesen felmerülő fordítási hibákat jelezd vissza.
+- Ezt a modult ebben a munkakörnyezetben nem lehet teljeskörűen lefordítani (nincs Android
+  SDK, és a Google Maven (`dl.google.com`) sincs engedélyezve a hálózati szabályzat miatt) -
+  Android Studióban való megnyitás után esetlegesen felmerülő fordítási hibákat jelezd
+  vissza. A build-eszközlánc (Gradle/Kotlin/KSP verziók) illesztését azonban valódi
+  Gradle-lel, a Google Mavenen kívüli forrásokból (Maven Central, Gradle Plugin Portal)
+  ellenőriztem.
+
+### Fordítási hibák Android Studio alatt - hibaelhárítás
+
+Ha `:app:kaptDebugKotlin` (vagy hasonló) taszk hibázik `"Provided Metadata instance has
+version X.X.X, while maximum supported version is 2.0.0"` üzenettel: ez azt jelenti, hogy a
+ténylegesen használt Kotlin fordító újabb, mint amit a `kapt` (a régi, karbantartás alatt
+lévő Room annotációfeldolgozó) beépített metaadat-olvasója kezelni tud. A projekt emiatt már
+`kapt` helyett `KSP`-t (Kotlin Symbol Processing) használ a Room-hoz - ha mégis felmerülne
+hasonló verzióütközés, ellenőrizd, hogy a gyökér `build.gradle.kts`-ben megadott Kotlin
+(`org.jetbrains.kotlin.android`) és a `com.google.devtools.ksp` plugin verziói össze
+vannak-e hangolva (a KSP verziószáma mindig `<kotlin-verzió>-<ksp-verzió>` alakú, pl. a
+Kotlin 2.2.0-hoz a KSP 2.2.0-2.0.2 tartozik).
