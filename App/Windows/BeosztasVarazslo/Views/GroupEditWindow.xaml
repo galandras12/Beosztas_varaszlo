@@ -11,7 +11,7 @@
             <TextBox x:Name="TxtName" Margin="0,0,0,14" />
 
             <TextBlock Text="Típus" Style="{StaticResource HintText}" Margin="0,0,0,4" />
-            <RadioButton x:Name="RbGeneral" GroupName="GroupType" IsChecked="True" Checked="Type_Changed"
+            <RadioButton x:Name="RbGeneral" GroupName="GroupType" Checked="Type_Changed"
                          Content="Általános (bármely nap, akár váltásos is)" />
             <RadioButton x:Name="RbOffice" GroupName="GroupType" Checked="Type_Changed"
                          Content="Iroda (hétfő-péntek, ünnepnap kivétel)" Margin="0,0,0,14" />
