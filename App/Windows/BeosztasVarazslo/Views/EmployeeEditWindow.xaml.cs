@@ -18,6 +18,7 @@ public partial class EmployeeEditWindow : Window
         Title = existing == null ? "Új dolgozó" : "Dolgozó szerkesztése";
 
         CmbGroup.ItemsSource = _groups;
+        CmbGroup.SelectionChanged += (_, _) => RenderExcludedShifts();
 
         if (existing != null)
         {
@@ -33,6 +34,31 @@ public partial class EmployeeEditWindow : Window
             CmbGroup.SelectedIndex = 0;
             TxtFactor.Text = "1";
             TxtMaxVacation.Text = "20";
+        }
+
+        RenderExcludedShifts();
+    }
+
+    private void RenderExcludedShifts()
+    {
+        ExcludedShiftsPanel.Children.Clear();
+        if (CmbGroup.SelectedItem is not WorkGroup group || group.Type == GroupTypes.Office || group.ShiftTypes.Count < 2)
+        {
+            ExcludedShiftsWrap.Visibility = Visibility.Collapsed;
+            return;
+        }
+        ExcludedShiftsWrap.Visibility = Visibility.Visible;
+        var existingExcluded = _existing?.ExcludedShiftCodes ?? new List<string>();
+        foreach (var st in group.ShiftTypes)
+        {
+            var cb = new System.Windows.Controls.CheckBox
+            {
+                Content = $"{st.Label} ({st.Code})",
+                Tag = st.Code,
+                IsChecked = existingExcluded.Contains(st.Code),
+                Margin = new Thickness(0, 2, 0, 2)
+            };
+            ExcludedShiftsPanel.Children.Add(cb);
         }
     }
 
@@ -64,6 +90,10 @@ public partial class EmployeeEditWindow : Window
             return;
         }
         var factor = double.TryParse(TxtFactor.Text, out var f) && f > 0 ? f : 1.0;
+        var excludedShiftCodes = ExcludedShiftsPanel.Children.OfType<System.Windows.Controls.CheckBox>()
+            .Where(cb => cb.IsChecked == true)
+            .Select(cb => (string)cb.Tag)
+            .ToList();
 
         Result = new Employee
         {
@@ -72,7 +102,8 @@ public partial class EmployeeEditWindow : Window
             GroupId = selectedGroup.Id,
             EmploymentFactor = factor,
             MaxVacationDays = maxVac,
-            Notes = TxtNotes.Text.Trim()
+            Notes = TxtNotes.Text.Trim(),
+            ExcludedShiftCodes = excludedShiftCodes
         };
         DialogResult = true;
         Close();

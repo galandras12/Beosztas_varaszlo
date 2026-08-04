@@ -57,5 +57,26 @@
             android:minLines="2"
             android:gravity="top" />
 
+        <LinearLayout
+            android:id="@+id/excludedShiftsWrap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nem osztható be automatikusan (kérésre) az alábbi műszaktípusokba:"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/excludedShiftsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

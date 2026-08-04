@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import hu.beosztasvarazslo.app.data.EmployeeEntity
+import hu.beosztasvarazslo.app.data.excludedShiftCodeList
 import hu.beosztasvarazslo.app.databinding.ItemEmployeeBinding
 import hu.beosztasvarazslo.app.databinding.ItemEmployeeHeaderBinding
 
@@ -50,9 +51,11 @@ class EmployeeAdapter(
             is EmployeeListItem.Row -> {
                 val vh = holder as RowVH
                 vh.binding.tvEmployeeName.text = item.employee.name
+                val excluded = item.employee.excludedShiftCodeList()
                 vh.binding.tvEmployeeDetails.text =
                     "Munkaidő-arány: ${item.employmentFactor} · Max. szabadság: ${item.employee.maxVacationDays} nap · " +
-                    "Kivett: ${item.used} nap · Hátralévő: ${item.remaining} nap"
+                    "Kivett: ${item.used} nap · Hátralévő: ${item.remaining} nap" +
+                    (if (excluded.isNotEmpty()) " · Kizárva: ${excluded.joinToString(", ")}" else "")
                 vh.binding.btnEditEmployee.setOnClickListener { onEdit(item.employee) }
                 vh.binding.btnDeleteEmployee.setOnClickListener { onDelete(item.employee) }
             }

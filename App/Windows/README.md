@@ -1,7 +1,18 @@
 # Beosztás Varázsló – Windows
 
 A repó gyökerében lévő böngészős (HTML/CSS/JS) verzió natív Windows portja: .NET 8 / WPF
-asztali alkalmazás, modern (Fluent-stílusú, Windows 11 jellegű) megjelenéssel.
+asztali alkalmazás, klasszikus Microsoft "Metro" (Modern UI, Windows 8/Windows Phone
+jellegű) megjelenéssel.
+
+## Kinézet – Microsoft "Metro" (Modern UI)
+
+Az alkalmazás a Windows 8 / Windows Phone korszakának "Metro" dizájnnyelvét idézi: sík,
+tömör (nem áttetsző, árnyék nélküli) felületek, éles - nem lekerekített - sarkok, vivid
+kobalt-kék elsődleges szín, világos ("Segoe UI Light") és félkövér tipográfia keveréke a
+címekben, és a kijelölt navigációs elemet nem finom kiemelés, hanem egy tömör, tömbszerű
+színfolt jelzi (a Fluent/Mica-alapú, lekerekített, üvegesített korábbi megjelenés helyett).
+A stílusdefiníciók a `Themes/Styles.xaml`, `Themes/Light.xaml` és `Themes/Dark.xaml`
+fájlokban találhatók.
 
 ## Megnyitás és futtatás
 
@@ -41,12 +52,11 @@ Teendők az első megnyitáskor:
 - **Views/** – 5 nézet (UserControl) a bal oldali navigációs sávból elérve: Beállítások,
   Munkacsoportok, Dolgozók, Beosztás, Nyomtatás/Export - mindegyik kódból (code-behind)
   építi fel/frissíti a tartalmát, hasonlóan az Android verzióhoz.
-- **Themes/** – világos/sötét Fluent-stílusú színpaletta (a rendszerbeállítás alapján
-  automatikusan kiválasztva induláskor) és egyedi vezérlő-stílusok (lekerekített gombok,
-  kártyák, navigációs lista).
-- **Helpers/WindowBackdrop.cs** – a címsort a rendszertémához igazítja, és Windows 11
-  (22H2+) rendszeren megkísérli a Mica anyagtípust beállítani a DWM API-n keresztül;
-  régebbi Windows verzión egyszerűen hatástalan marad.
+- **Themes/** – világos/sötét, klasszikus Microsoft "Metro" (Modern UI) stílusú színpaletta
+  (a rendszerbeállítás alapján automatikusan kiválasztva induláskor) és egyedi
+  vezérlő-stílusok (éles sarkú, sík "tile" gombok/kártyák, tömör navigációs sáv).
+- **Helpers/ThemeDetector.cs** – a rendszer sötét/világos témabeállítását olvassa ki
+  induláskor, hogy a megfelelő `Themes/Light.xaml` / `Themes/Dark.xaml` töltődjön be.
 
 ## Funkciók (megegyeznek a böngészős/Android verzióval)
 
@@ -98,9 +108,5 @@ okok - érdemes ezeket ellenőrizni:
    (ahol maga a WPF fordító nem futtatható) el lehetett végezni.
 
 ## Ismert korlátok
-- A Mica ablakháttér csak Windows 11 (22H2+) rendszeren, és ott is legfeljebb a natív
-  címsor sávján válhat láthatóvá, mivel a tartalmi terület (kártyák, navigációs sáv)
-  szándékosan átlátszatlan hátteret használ a régebbi Windows verziókon való biztonságos
-  megjelenés érdekében.
 - A nézetek egyszerű, nem virtualizált (nem RecyclerView/ListView-szerű) elemekből épülnek
   fel kódból - néhány tucat dolgozóig gördülékeny, nagyon nagy létszámnál lassulhat.

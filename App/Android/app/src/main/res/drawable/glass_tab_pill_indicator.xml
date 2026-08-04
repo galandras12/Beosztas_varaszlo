@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- A kiválasztott fül mögötti "pill" háttér (nem aláhúzás) - a TabLayout
-     app:tabIndicatorGravity="center" és app:tabIndicatorFullWidth="false"
-     beállításokkal együtt használva. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="@color/glass_primary_fill" />
-    <corners android:radius="999dp" />
-</shape>

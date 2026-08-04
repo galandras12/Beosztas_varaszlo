@@ -181,6 +181,7 @@ class AppRepository(private val db: AppDatabase) {
         var bestHours = Double.MAX_VALUE
         for (emp in employees) {
             if (emp.id == sickEmployeeId) continue
+            if (emp.excludedShiftCodeList().contains(shiftCode)) continue // kérésre nem osztható be ebbe a műszaktípusba
             val codes = getMonthCodes(emp.id, year, month)
             if (!codes[day].isNullOrEmpty()) continue // aznap már be van osztva valamire
 
@@ -202,24 +203,34 @@ class AppRepository(private val db: AppDatabase) {
     data class AutoFillShortfall(val groupName: String, val day: Int, val shiftLabel: String, val needed: Int, val assigned: Int)
 
     /** Az automatikus kitöltés eredménye. */
-    data class AutoFillResult(val filledCells: Int, val shortfalls: List<AutoFillShortfall>)
+    data class AutoFillResult(val filledCells: Int, val restCellsMarked: Int, val shortfalls: List<AutoFillShortfall>)
 
     /**
      * Automatikus beosztás-kitöltő. Csak ÜRES cellákba ír - meglévő (kézzel beírt vagy korábban
      * generált) kódokat sosem ír felül.
      * - Irodai (hétfő-péntek) csoportoknál: minden munkanapon minden dolgozóhoz "M" kódot ír.
      * - Egymást váltó, létszám-figyelt (staffPerShift > 0) csoportoknál: napról napra,
-     *   műszaktípusonként annyi szabad, a csoport `minRestHours` pihenőidejét betartó dolgozót
+     *   műszaktípusonként annyi szabad, a csoport `minRestHours` pihenőidejét betartó, a
+     *   kérésre kizárt műszaktípusokat (excludedShiftCodes) figyelmen kívül hagyó dolgozót
      *   jelöl ki, ameddig a szükséges létszám meg nem telik - a legkevesebb eddig ledolgozott
      *   órájú (méltányos terheléselosztás), egyformaság esetén névsor szerinti dolgozókat
      *   részesítve előnyben. Ha nincs elég szabad/pihent dolgozó, annyit oszt be, amennyi van,
      *   és a hiányt jelzi.
+     * - Hónapváltás: ha egy dolgozó az előző hónap utolsó napjaiban dolgozott (a csoport
+     *   műszaktípusai közül valamelyiket), a pihenőidőt a hónaphatáron át is figyelembe veszi,
+     *   és a hónap elején még szükséges pihenőnapokat explicit "P" kóddal jelöli.
      */
     suspend fun autoFillMonth(year: Int, month: Int): AutoFillResult {
         val dim = ScheduleCalculator.daysInMonth(year, month)
         val holidayMap = getHolidayMap(year)
         var filledCells = 0
+        var restCellsMarked = 0
         val shortfalls = mutableListOf<AutoFillShortfall>()
+
+        var prevYear = year
+        var prevMonth = month - 1
+        if (prevMonth < 1) { prevMonth = 12; prevYear -= 1 }
+        val prevDim = ScheduleCalculator.daysInMonth(prevYear, prevMonth)
 
         for (gws in getGroupsWithShiftTypes()) {
             val group = gws.group
@@ -242,11 +253,23 @@ class AppRepository(private val db: AppDatabase) {
             if (group.staffPerShift > 0 && gws.shiftTypes.isNotEmpty()) {
                 val minRestDays = Math.ceil(group.minRestHours / 24.0).toInt()
                 val codesByEmployee = groupEmployees.associate { it.id to getMonthCodes(it.id, year, month).toMutableMap() }
+                val prevCodesByEmployee = groupEmployees.associate { it.id to getMonthCodes(it.id, prevYear, prevMonth) }
                 val lastWorkedDay = HashMap<Long, Int>()
                 val shiftCount = HashMap<Long, Int>()
                 groupEmployees.forEach { emp ->
                     lastWorkedDay[emp.id] = Int.MIN_VALUE
                     shiftCount[emp.id] = 0
+
+                    // Hónaphatáron átnyúló pihenőidő: az előző hónap utolsó, ebben a csoportban
+                    // ledolgozott napja "0" (utolsó nap), "-1" (utolsó előtti) stb. relatív napot kap.
+                    val prevCodes = prevCodesByEmployee.getValue(emp.id)
+                    for (pd in 1..prevDim) {
+                        val prevCode = prevCodes[pd]
+                        if (prevCode != null && gws.shiftTypes.any { it.code == prevCode }) {
+                            lastWorkedDay[emp.id] = pd - prevDim
+                        }
+                    }
+
                     val codes = codesByEmployee.getValue(emp.id)
                     for (d in 1..dim) {
                         val code = codes[d]
@@ -254,6 +277,23 @@ class AppRepository(private val db: AppDatabase) {
                             lastWorkedDay[emp.id] = d
                             shiftCount[emp.id] = shiftCount.getValue(emp.id) + 1
                         }
+                    }
+                }
+
+                // Az előző havi utolsó műszak miatt még kötelező pihenőnapokat explicit "P" kóddal jelöljük.
+                groupEmployees.forEach { emp ->
+                    val last = lastWorkedDay.getValue(emp.id)
+                    if (last == Int.MIN_VALUE || last > 0) return@forEach
+                    val codes = codesByEmployee.getValue(emp.id)
+                    var d = 1
+                    while (d <= dim && (d - last) <= minRestDays) {
+                        if (codes[d].isNullOrEmpty()) {
+                            setCell(emp.id, year, month, d, "P")
+                            codes[d] = "P"
+                            restCellsMarked++
+                            filledCells++
+                        }
+                        d++
                     }
                 }
 
@@ -269,6 +309,7 @@ class AppRepository(private val db: AppDatabase) {
                         if (needed == 0) continue
 
                         val candidates = groupEmployees.filter { emp ->
+                            if (emp.excludedShiftCodeList().contains(st.code)) return@filter false
                             if (assignedToday.contains(emp.id)) return@filter false
                             if (!codesByEmployee.getValue(emp.id)[d].isNullOrEmpty()) return@filter false
                             val last = lastWorkedDay.getValue(emp.id)
@@ -295,7 +336,7 @@ class AppRepository(private val db: AppDatabase) {
             }
         }
 
-        return AutoFillResult(filledCells, shortfalls)
+        return AutoFillResult(filledCells, restCellsMarked, shortfalls)
     }
 
     // ---------- JSON export / import (biztonsági mentés, hordozhatóság) ----------
@@ -327,7 +368,7 @@ class AppRepository(private val db: AppDatabase) {
             empArr.put(
                 JSONObject().put("id", e.id).put("name", e.name).put("groupId", e.groupId)
                     .put("employmentFactor", e.employmentFactor).put("maxVacationDays", e.maxVacationDays)
-                    .put("notes", e.notes)
+                    .put("notes", e.notes).put("excludedShiftCodes", e.excludedShiftCodes)
             )
         }
         root.put("employees", empArr)
@@ -421,7 +462,8 @@ class AppRepository(private val db: AppDatabase) {
                             groupId = newGroupId,
                             employmentFactor = je.optDouble("employmentFactor", 1.0),
                             maxVacationDays = je.getInt("maxVacationDays"),
-                            notes = je.optString("notes", "")
+                            notes = je.optString("notes", ""),
+                            excludedShiftCodes = je.optString("excludedShiftCodes", "")
                         )
                     )
                     employeeIdMap[oldId] = newId

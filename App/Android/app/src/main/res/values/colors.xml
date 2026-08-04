@@ -1,46 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#5B6CFF</color>
-    <color name="primary_dark">#3F4FE0</color>
-    <color name="background">#F4F6F8</color>
+    <!-- ===================== Google Material 3 (M3) színpaletta ===================== -->
+    <!-- Egyetlen "seed" (mag)színből (mély indigó-lila) származtatott M3 tónusos szerepkörök. -->
+    <color name="m3_primary">#4F378B</color>
+    <color name="m3_on_primary">#FFFFFF</color>
+    <color name="m3_primary_container">#EADDFF</color>
+    <color name="m3_on_primary_container">#22005D</color>
+    <color name="m3_secondary_container">#E8DEF8</color>
+    <color name="m3_on_secondary_container">#1D192B</color>
+    <color name="m3_surface">#FFFBFE</color>
+    <color name="m3_surface_variant">#F3EDF7</color>
+    <color name="m3_on_surface">#1C1B1F</color>
+    <color name="m3_on_surface_variant">#49454F</color>
+    <color name="m3_outline">#CAC4D0</color>
+    <color name="m3_outline_strong">#79747E</color>
+    <color name="m3_error">#B3261E</color>
+
+    <!-- Az alkalmazás kódja/elrendezései az alábbi, egyszerű neveken hivatkoznak a
+         színekre - az értékeik most a fenti M3 palettát tükrözik. -->
+    <color name="primary">#4F378B</color>
+    <color name="primary_dark">#3B2A6B</color>
+    <color name="background">#FFFBFE</color>
     <color name="surface">#FFFFFF</color>
-    <color name="text_primary">#1F2937</color>
-    <color name="text_muted">#6B7280</color>
-    <color name="danger">#DC2626</color>
-    <color name="success">#16A34A</color>
-    <color name="warning">#D97706</color>
-    <color name="border">#D7DDE3</color>
-    <color name="weekend_bg">#F0F0F0</color>
-    <color name="holiday_bg">#FDE3E3</color>
-    <color name="vacation_bg">#DCF5DF</color>
-    <color name="sick_bg">#F8D7D5</color>
-    <color name="absence_bg">#EFE6E0</color>
+    <color name="text_primary">#1C1B1F</color>
+    <color name="text_muted">#49454F</color>
+    <color name="danger">#B3261E</color>
+    <color name="success">#146C2E</color>
+    <color name="warning">#7D5700</color>
+    <color name="border">#CAC4D0</color>
+    <color name="weekend_bg">#F3EDF7</color>
+    <color name="holiday_bg">#FBE9E7</color>
+    <color name="vacation_bg">#E1F3E1</color>
+    <color name="sick_bg">#FADAD7</color>
+    <color name="absence_bg">#F1E6DD</color>
     <color name="rest_bg">#E7EBEE</color>
-    <color name="ic_launcher_background">#5B6CFF</color>
+    <color name="ic_launcher_background">#4F378B</color>
 
-    <!-- ===== "Liquid Glass" paletta ===== -->
-    <!-- Élénk, átlós háttérgradiens, ami "átlátszik" az üveges felületeken. -->
-    <color name="gradient_start">#4A67FF</color>
-    <color name="gradient_mid">#7C6CFF</color>
-    <color name="gradient_end">#3FD0E0</color>
-
-    <!-- Világos ("frosted") üveg felületek: kártyák, gombok, beviteli mezők. -->
-    <color name="glass_light_fill">#D9FFFFFF</color>       <!-- ~85% fehér -->
-    <color name="glass_light_fill_soft">#B3FFFFFF</color>  <!-- ~70% fehér -->
-    <color name="glass_light_stroke">#99FFFFFF</color>     <!-- ~60% fehér él-fény -->
-    <color name="glass_highlight">#40FFFFFF</color>        <!-- felső fénycsík -->
-
-    <!-- Sötét üveg: felső eszköztár, hogy fehér szöveg jól olvasható legyen rajta. -->
-    <color name="glass_dark_fill">#4D1A1A2E</color>        <!-- ~30% sötétkék-fekete -->
-    <color name="glass_dark_stroke">#33FFFFFF</color>
-
-    <color name="glass_text_on_dark">#FFFFFFFF</color>
-    <color name="glass_text_on_dark_muted">#CCFFFFFF</color>
-
-    <!-- Élénk, üveges elsődleges gomb kitöltés (áttetsző accent szín). -->
-    <color name="glass_primary_fill">#CC5B6CFF</color>
-
-    <!-- A beosztás-táblázat fejléc celláinak enyhén lila-kék árnyalatú háttere,
-         hogy jól elváljon az üveges kártya majdnem-fehér alapszínétől. -->
-    <color name="schedule_header_bg">#E4E1FF</color>
+    <!-- A "Dolgozók" fülön a munkacsoport-szekció fejlécének (chip-szerű) háttere/szövege. -->
+    <color name="schedule_header_bg">#EADDFF</color>
 </resources>

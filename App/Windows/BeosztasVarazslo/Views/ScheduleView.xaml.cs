@@ -271,6 +271,14 @@ public partial class ScheduleView : UserControl, IRefreshableView
                 return;
             }
         }
+        if (!string.IsNullOrEmpty(newCode) && newCode != oldCode && employee.ExcludedShiftCodes.Contains(newCode))
+        {
+            var shiftLabel = group.ShiftTypes.FirstOrDefault(st => st.Code == newCode);
+            var result = MessageBox.Show(Window.GetWindow(this),
+                $"{employee.Name} kérésre nem szeretne {(shiftLabel != null ? $"{shiftLabel.Label} ({newCode})" : newCode)} műszakban dolgozni. Biztosan mégis ezt a műszakot jelölöd ki?",
+                "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+        }
         _repo.SetCell(employee.Id, _selYear, _selMonth, day, newCode);
 
         // Hirtelen beteg szabadság: ha egymást váltó (StaffPerShift > 0) csoportban egy
@@ -329,12 +337,16 @@ public partial class ScheduleView : UserControl, IRefreshableView
         var result = MessageBox.Show(Window.GetWindow(this),
             $"Automatikusan kitölti a(z) {AppDatabaseService.MonthNames[_selMonth - 1]} {_selYear} hónap ÜRES celláit: " +
             "irodai csoportoknál minden munkanapra munkaórát ír, az egymást váltó (létszám-figyelt) csoportoknál pedig " +
-            "a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra. A már kitöltött cellákat nem érinti. Folytatod?",
+            "a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra (a kizárt műszaktípusokat és az előző havi utolsó műszak miatti pihenőidőt figyelembe véve). A már kitöltött cellákat nem érinti. Folytatod?",
             "Automatikus kitöltés", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes) return;
 
         var fillResult = _repo.AutoFillMonth(_selYear, _selMonth);
         RebuildGrid();
+
+        var restNote = fillResult.RestCellsMarked > 0
+            ? $" (ebből {fillResult.RestCellsMarked} pihenőnap az előző havi utolsó műszak miatti kötelező pihenőidő miatt)"
+            : "";
 
         if (fillResult.FilledCells == 0 && fillResult.Shortfalls.Count == 0)
         {
@@ -343,7 +355,7 @@ public partial class ScheduleView : UserControl, IRefreshableView
         }
         else if (fillResult.Shortfalls.Count == 0)
         {
-            MessageBox.Show(Window.GetWindow(this), $"{fillResult.FilledCells} cella automatikusan kitöltve.",
+            MessageBox.Show(Window.GetWindow(this), $"{fillResult.FilledCells} cella automatikusan kitöltve{restNote}.",
                 "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         else
@@ -352,7 +364,7 @@ public partial class ScheduleView : UserControl, IRefreshableView
                 .Select(s => $"{s.Group} – {s.Day}. nap, {s.ShiftLabel}: {s.Assigned}/{s.Needed} fő"));
             var more = fillResult.Shortfalls.Count > 5 ? "; …" : "";
             MessageBox.Show(Window.GetWindow(this),
-                $"{fillResult.FilledCells} cella kitöltve, de {fillResult.Shortfalls.Count} esetben nem volt elég szabad/pihent dolgozó ({details}{more}).",
+                $"{fillResult.FilledCells} cella kitöltve{restNote}, de {fillResult.Shortfalls.Count} esetben nem volt elég szabad/pihent dolgozó ({details}{more}).",
                 "Beosztás Varázsló", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }

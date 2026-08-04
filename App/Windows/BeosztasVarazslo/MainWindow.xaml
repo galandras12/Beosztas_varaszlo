@@ -13,14 +13,15 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Navigációs sáv (a mögötte lévő Mica háttér áttetszőn átlátszik) -->
-        <Border Grid.Column="0" Background="{DynamicResource NavPaneOverlayBrush}">
+        <!-- Navigációs sáv: sík, tömör felület (Metro stílusban nincs áttetszőség/elmosás). -->
+        <Border Grid.Column="0" Background="{DynamicResource NavPaneOverlayBrush}"
+                BorderBrush="{DynamicResource AccentBrush}" BorderThickness="0,0,3,0">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Margin="22,26,18,18">
-                    <TextBlock Text="Beosztás" FontSize="18" FontWeight="SemiBold"
+                    <TextBlock Text="BEOSZTÁS" FontSize="20" FontWeight="Light"
                                Foreground="{DynamicResource TextPrimaryBrush}" />
-                    <TextBlock Text="Varázsló" FontSize="18" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AccentBrush}" Margin="0,-4,0,0" />
+                    <TextBlock Text="VARÁZSLÓ" FontSize="20" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" Margin="0,-2,0,0" />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="10,0,10,16">

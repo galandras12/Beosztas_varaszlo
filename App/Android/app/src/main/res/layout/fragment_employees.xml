@@ -59,7 +59,7 @@
         android:contentDescription="Új dolgozó"
         android:src="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
-        app:backgroundTint="@color/glass_primary_fill"
+        app:backgroundTint="@color/primary"
         app:rippleColor="#40FFFFFF" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

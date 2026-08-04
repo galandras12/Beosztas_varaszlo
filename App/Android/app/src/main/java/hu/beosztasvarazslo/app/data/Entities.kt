@@ -57,7 +57,11 @@ data class EmployeeEntity(
     val employmentFactor: Double,
     /** Kötelezően kitöltendő: az adott dolgozónak évente kiadható szabadságnapok max. száma. */
     val maxVacationDays: Int,
-    val notes: String = ""
+    val notes: String = "",
+    /** Vesszővel elválasztott műszatípus-kódok, amelyekbe a dolgozó kérésre nem osztható be
+     *  (pl. "É" = nem dolgozhat éjszakás műszakban). Az automatikus kitöltő és a beteg
+     *  szabadság helyettes-keresője figyelembe veszi. */
+    val excludedShiftCodes: String = ""
 )
 
 /** Egy dolgozó egy napjának beosztási kódja (pl. "N", "É", "M", "SZ", "H", "P"). */

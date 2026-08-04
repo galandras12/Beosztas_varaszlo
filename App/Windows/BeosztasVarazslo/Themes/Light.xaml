@@ -7,19 +7,19 @@
     <SolidColorBrush x:Key="BorderBrush" Color="#E1E1E1" />
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1A1A1A" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5F6368" />
-    <SolidColorBrush x:Key="AccentBrush" Color="#0067C0" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#005AA6" />
-    <SolidColorBrush x:Key="AccentPressedBrush" Color="#00497F" />
-    <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E5F0FA" />
-    <SolidColorBrush x:Key="DangerBrush" Color="#C42B1C" />
-    <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FDEDEB" />
-    <SolidColorBrush x:Key="SuccessBrush" Color="#0F7B0F" />
-    <SolidColorBrush x:Key="SuccessSubtleBrush" Color="#E7F5E7" />
-    <SolidColorBrush x:Key="WarningBrush" Color="#9D5D00" />
-    <SolidColorBrush x:Key="WarningSubtleBrush" Color="#FFF4E5" />
-    <SolidColorBrush x:Key="NavBackgroundBrush" Color="#FBFBFB" />
-    <SolidColorBrush x:Key="NavPaneOverlayBrush" Color="#CCFBFBFB" />
-    <SolidColorBrush x:Key="NavSelectedBrush" Color="#E5F0FA" />
+    <!-- Klasszikus Windows 8 "Metro" kobalt-kék accent szín. -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#0050EF" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#1863F2" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="#003FBF" />
+    <SolidColorBrush x:Key="AccentSubtleBrush" Color="#DCE7FC" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#E51400" />
+    <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FBE0DD" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#00A300" />
+    <SolidColorBrush x:Key="SuccessSubtleBrush" Color="#DFF2DF" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#A05000" />
+    <SolidColorBrush x:Key="WarningSubtleBrush" Color="#FCE8D6" />
+    <SolidColorBrush x:Key="NavBackgroundBrush" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="NavPaneOverlayBrush" Color="#F3F3F3" />
     <SolidColorBrush x:Key="WeekendBrush" Color="#F2F2F2" />
     <SolidColorBrush x:Key="HolidayBrush" Color="#FCE3E1" />
     <SolidColorBrush x:Key="VacationBrush" Color="#DDF3DD" />

@@ -151,6 +151,7 @@
     let bestHours = Infinity;
     employees.forEach(emp => {
       if (emp.id === sickEmployeeId) return;
+      if ((emp.excludedShiftCodes || []).includes(shiftCode)) return; // kérésre nem osztható be ebbe a műszaktípusba
       const code = getCell(state, year, month, emp.id, day);
       if (code) return; // aznap már be van osztva valamire (munka, szabadság, pihenő stb.)
       const summary = summarizeEmployeeMonth(state, group, emp, year, month);
@@ -177,12 +178,22 @@
    *   névsor szerinti dolgozókat részesítve előnyben. Ha nincs elég szabad/pihent dolgozó,
    *   annyit oszt be, amennyi van, és figyelmeztetésben jelzi a hiányt (a lefedettség-kijelző
    *   ez esetben is jelezni fogja pirossal/narancssal).
-   * @returns {{ filledCells:number, shortfalls: Array<{group:string, day:number, shiftLabel:string, needed:number, assigned:number}> }}
+   * Hónapváltás: ha egy dolgozó az előző hónap utolsó napjaiban dolgozott (a csoport
+   * műszaktípusai közül valamelyiket), a program az érintett dolgozóknál a pihenőidőt a
+   * hónaphatáron át is figyelembe veszi - és a hónap elején még szükséges pihenőnapokat
+   * explicit "P" kóddal jelöli (nem csak üresen hagyja), hogy véletlenül se lehessen őket
+   * pl. újra éjszakás műszakba osztani.
+   * @returns {{ filledCells:number, restCellsMarked:number, shortfalls: Array<{group:string, day:number, shiftLabel:string, needed:number, assigned:number}> }}
    */
   function autoFillMonth(state, year, month) {
     const dim = daysInMonth(year, month);
     let filledCells = 0;
+    let restCellsMarked = 0;
     const shortfalls = [];
+
+    let prevYear = year, prevMonth = month - 1;
+    if (prevMonth < 1) { prevMonth = 12; prevYear = year - 1; }
+    const prevDim = daysInMonth(prevYear, prevMonth);
 
     (state.groups || []).forEach(group => {
       const groupEmployees = state.employees.filter(e => e.groupId === group.id);
@@ -210,12 +221,35 @@
         groupEmployees.forEach(emp => {
           lastWorkedDay[emp.id] = -Infinity;
           shiftCount[emp.id] = 0;
+
+          // Hónaphatáron átnyúló pihenőidő: az előző hónap utolsó, ebben a csoportban ledolgozott
+          // napja "0" (utolsó nap), "-1" (utolsó előtti) stb. relatív nap-sorszámot kap.
+          for (let pd = 1; pd <= prevDim; pd++) {
+            const prevCode = getCell(state, prevYear, prevMonth, emp.id, pd);
+            if (prevCode && getShiftTypeByCode(group, prevCode)) {
+              lastWorkedDay[emp.id] = pd - prevDim;
+            }
+          }
+
           for (let d = 1; d <= dim; d++) {
             const code = getCell(state, year, month, emp.id, d);
             if (code && getShiftTypeByCode(group, code)) {
               lastWorkedDay[emp.id] = d;
               shiftCount[emp.id]++;
             }
+          }
+        });
+
+        // Az előző havi utolsó műszak miatt még kötelező pihenőnapokat explicit "P" kóddal jelöljük.
+        groupEmployees.forEach(emp => {
+          const last = lastWorkedDay[emp.id];
+          if (last === -Infinity || last > 0) return; // nincs áthúzódó pihenő, vagy már ebben a hónapban dolgozott
+          for (let d = 1; d <= dim && (d - last) <= minRestDays; d++) {
+            const existing = getCell(state, year, month, emp.id, d);
+            if (existing) continue;
+            setCell(state, year, month, emp.id, d, 'P');
+            restCellsMarked++;
+            filledCells++;
           }
         });
 
@@ -235,6 +269,7 @@
             if (needed === 0) return;
 
             const candidates = groupEmployees.filter(emp => {
+              if ((emp.excludedShiftCodes || []).includes(st.code)) return false;
               if (assignedToday.has(emp.id)) return false;
               const existing = getCell(state, year, month, emp.id, d);
               if (existing) return false;
@@ -266,7 +301,7 @@
       }
     });
 
-    return { filledCells, shortfalls };
+    return { filledCells, restCellsMarked, shortfalls };
   }
 
   global.App = global.App || {};

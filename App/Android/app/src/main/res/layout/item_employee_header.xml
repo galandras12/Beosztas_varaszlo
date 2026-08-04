@@ -6,6 +6,6 @@
     android:layout_marginBottom="6dp"
     android:paddingHorizontal="14dp"
     android:paddingVertical="6dp"
-    android:background="@drawable/glass_button_primary_bg"
+    android:background="@drawable/bg_group_header_chip"
     android:textStyle="bold"
-    android:textColor="@android:color/white" />
+    android:textColor="@color/m3_on_primary_container" />

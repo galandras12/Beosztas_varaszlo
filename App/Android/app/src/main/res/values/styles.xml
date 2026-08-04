@@ -1,59 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- ===================== "Liquid Glass" kártya ===================== -->
-    <style name="Widget.Glass.Card" parent="Widget.MaterialComponents.CardView">
-        <item name="cardBackgroundColor">@color/glass_light_fill</item>
-        <item name="cardCornerRadius">24dp</item>
-        <item name="cardElevation">6dp</item>
-        <item name="strokeColor">@color/glass_light_stroke</item>
+    <!-- ===================== Google Material 3 kártya ===================== -->
+    <!-- A régebbi "Widget.Glass.*" stílusneveket szándékosan megtartottuk (ezekre
+         hivatkozik minden layout/dialog fájl), de a tartalmuk mostantól valódi,
+         sík (nem áttetsző) Material 3 megjelenést ad: M3 kártya-alapstílus,
+         kerekített (12dp, M3 "medium" shape), finom kontúr, kis emelkedés. -->
+    <style name="Widget.Glass.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="strokeColor">@color/border</item>
         <item name="strokeWidth">1dp</item>
-        <item name="android:foreground">@drawable/glass_highlight_overlay</item>
-    </style>
-
-    <!-- Sötétebb, áttetsző üvegsáv (pl. lebegő navigációs sáv, eszköztár). -->
-    <style name="Widget.Glass.Card.Dark">
-        <item name="cardBackgroundColor">@color/glass_dark_fill</item>
-        <item name="strokeColor">@color/glass_dark_stroke</item>
     </style>
 
     <!-- ===================== Gombok ===================== -->
-    <!-- MaterialComponents témában a sima <Button> tag futásidőben MaterialButton-ra
+    <!-- MaterialComponents/Material3 témában a sima <Button> tag futásidőben MaterialButton-ra
          cserélődik, ezért a stílusnak MaterialButton natív (app:) attribútumait kell
          használnia (nem közvetlen android:background-ot), hogy biztosan érvényesüljön. -->
-    <style name="Widget.Glass.Button" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="backgroundTint">@color/glass_light_fill_soft</item>
-        <item name="strokeColor">@color/glass_light_stroke</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="cornerRadius">999dp</item>
-        <item name="rippleColor">@color/glass_light_stroke</item>
+    <style name="Widget.Glass.Button" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/border</item>
+        <item name="cornerRadius">10dp</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
     </style>
 
-    <style name="Widget.Glass.Button.Primary">
-        <item name="backgroundTint">@color/glass_primary_fill</item>
+    <style name="Widget.Glass.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="cornerRadius">10dp</item>
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="Widget.Glass.Button.Link" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@color/primary_dark</item>
         <item name="android:textAllCaps">false</item>
-        <item name="rippleColor">@color/glass_light_stroke</item>
     </style>
 
-    <style name="Widget.Glass.Button.Danger">
+    <style name="Widget.Glass.Button.Link" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Widget.Glass.Button.Danger" parent="Widget.Glass.Button.Link">
         <item name="android:textColor">@color/danger</item>
     </style>
 
     <!-- ===================== Beviteli mezők ===================== -->
     <!-- Sima <EditText> AppCompatEditText-re cserélődik, ami elfogadja a közvetlen
-         android:background-ot - itt biztonságos ezt az utat használni. -->
+         android:background-ot - itt biztonságos ezt az utat használni. M3 "outlined
+         text field" jellegű, sík háttér, lekerekített kontúr. -->
     <style name="Widget.Glass.EditText" parent="android:Widget.Material.EditText">
-        <item name="android:background">@drawable/glass_input_bg</item>
+        <item name="android:background">@drawable/bg_m3_input</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_muted</item>
     </style>

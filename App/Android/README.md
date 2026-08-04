@@ -21,19 +21,19 @@ Teendők az első megnyitáskor:
    ezek Maven Centralról/Google Maven-ről érkeznek).
 4. Futtasd egy Android 8.0 (API 26) vagy újabb emulátoron/eszközön.
 
-## Kinézet – "Liquid Glass"
+## Kinézet – Google Material 3
 
-Az alkalmazás megjelenése az Apple Liquid Glass dizájnnyelvét idézi: élénk, átlós
-színátmenetes háttér (`bg_liquid_gradient`), amely áttetszik a "fagyott üveg" jellegű
-felületeken - lekerekített, félig áttetsző fehér kártyák finom él-fénnyel (stroke) és felső
-fényreflexszel, kapszula alakú (pill) gombok, sötétebb üveges (áttetsző) felső eszköztár
-fehér szöveggel, és egy lebegő, lekerekített üveges navigációs sáv az alsó fülekhez (a
-kiválasztott fület egy kitöltött pill jelöli, nem aláhúzás). Ez a stílus a
-`res/values/styles.xml`-ben (`Widget.Glass.*`) és a `res/drawable/glass_*`,
-`bg_liquid_gradient` erőforrásokban van megvalósítva, kizárólag natív Android
-API-kkal/attribútumokkal (nincs valós idejű háttérelmosás, mert az API 31+ (Android 12)
-verziót igényelne; a minSdk 26 megtartása miatt az áttetszőség + lekerekítés + él-fény
-kombinációja adja az "üveg" hatást).
+Az alkalmazás megjelenése a Google Material 3 (Material You) dizájnrendszert követi: sík
+(nem áttetsző) felületek, egyetlen mag-színből (mély indigó-lila) származtatott M3 tónusos
+színszerepkörök (`colorPrimary`, `colorPrimaryContainer`, `colorSurfaceVariant` stb.),
+szabványos Material 3 komponens-stílusok (`Theme.Material3.Light.NoActionBar`,
+`Widget.Material3.CardView.Elevated`, `Widget.Material3.Button.*`) - lekerekített (8-12dp,
+M3 "medium" shape), finom kontúrral és kis emelkedéssel rendelkező kártyák, tömör színű felső
+sáv (`AppBarLayout` + `Toolbar`) és alatta dokkolt fülsáv (`TabLayout`) fehér alsó
+jelölővonallal. A stílusdefiníciók a `res/values/styles.xml` (`Widget.Glass.*` nevek alatt,
+de immár valódi M3 tartalommal - a történeti névre csak azért van szükség, mert minden
+layout/dialog fájl ezekre hivatkozik) és a `res/values/themes.xml`, `res/values/colors.xml`
+fájlokban találhatók.
 
 ## Architektúra
 

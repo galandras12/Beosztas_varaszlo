@@ -50,6 +50,11 @@ public class Employee
     /// <summary>Kötelezően kitöltendő: évente kiadható szabadságnapok max. száma.</summary>
     public int MaxVacationDays { get; set; }
     public string Notes { get; set; } = "";
+
+    /// <summary>Műszatípus-kódok, amelyekbe a dolgozó kérésre nem osztható be (pl. nem dolgozhat
+    /// éjszakás műszakban). Az automatikus kitöltő és a beteg szabadság helyettes-keresője
+    /// figyelembe veszi.</summary>
+    public List<string> ExcludedShiftCodes { get; set; } = new();
 }
 
 public class MonthHours

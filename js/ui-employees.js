@@ -41,7 +41,10 @@
           const used = Calc.yearVacationUsed(state, emp.id, year);
           const remaining = emp.maxVacationDays - used;
           const tr = document.createElement('tr');
-          tr.appendChild(UI.el('td', {}, [emp.name]));
+          const excl = emp.excludedShiftCodes && emp.excludedShiftCodes.length
+            ? [emp.name, UI.el('span', { class: 'hint', style: 'display:block;font-size:.8em' }, ['Kizárva: ' + emp.excludedShiftCodes.join(', ')])]
+            : [emp.name];
+          tr.appendChild(UI.el('td', {}, excl));
           tr.appendChild(UI.el('td', {}, [String(emp.employmentFactor != null ? emp.employmentFactor : 1)]));
           tr.appendChild(UI.el('td', {}, [String(emp.maxVacationDays)]));
           tr.appendChild(UI.el('td', {}, [String(used)]));
@@ -79,6 +82,8 @@
     const groupOptions = state.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'hu'))
       .map(g => '<option value="' + g.id + '"' + (g.id === emp.groupId ? ' selected' : '') + '>' + g.name + '</option>').join('');
 
+    const excluded = new Set(emp.excludedShiftCodes || []);
+
     const body = document.createElement('div');
     body.innerHTML =
       '<div class="form-grid">' +
@@ -87,11 +92,37 @@
       '<label>Munkaidő-arány (1 = teljes, 0.5 = fél)<input type="number" id="eFactor" step="0.05" min="0" max="2" value="' + (emp.employmentFactor != null ? emp.employmentFactor : 1) + '"></label>' +
       '<label>Max. kiadható szabadság (nap/év) <span style="color:#dc2626">*kötelező</span><input type="number" id="eMaxVac" min="0" required value="' + emp.maxVacationDays + '"></label>' +
       '<label class="full">Megjegyzés<textarea id="eNotes" rows="2">' + (emp.notes || '') + '</textarea></label>' +
+      '</div>' +
+      '<div class="full" id="eExcludedWrap" style="margin-top:.6em">' +
+      '<div class="hint" style="margin-bottom:.3em">Nem oszthatja be automatikusan (pl. kérésre) az alábbi műszaktípusokba - a helyettes-kereső és az automatikus kitöltő figyelembe veszi:</div>' +
+      '<div id="eExcludedShifts"></div>' +
       '</div>';
+
+    function renderExcludedShifts() {
+      const wrap = body.querySelector('#eExcludedShifts');
+      const groupId = body.querySelector('#eGroup').value;
+      const group = state.groups.find(g => g.id === groupId);
+      const outerWrap = body.querySelector('#eExcludedWrap');
+      if (!group || group.type === 'iroda' || (group.shiftTypes || []).length < 2) {
+        outerWrap.style.display = 'none';
+        wrap.innerHTML = '';
+        return;
+      }
+      outerWrap.style.display = '';
+      wrap.innerHTML = group.shiftTypes.map(st =>
+        '<label style="display:inline-flex;align-items:center;gap:.3em;margin-right:1em;font-weight:normal">' +
+        '<input type="checkbox" class="ex-shift-cb" value="' + st.code + '"' + (excluded.has(st.code) ? ' checked' : '') + '>' +
+        st.label + ' (' + st.code + ')</label>'
+      ).join('');
+    }
 
     UI.openModal({
       title: isNew ? 'Új dolgozó' : 'Dolgozó szerkesztése',
       bodyNode: body,
+      onMount: () => {
+        renderExcludedShifts();
+        body.querySelector('#eGroup').addEventListener('change', renderExcludedShifts);
+      },
       actions: [
         { label: 'Mégse' },
         {
@@ -108,10 +139,12 @@
               UI.toast('A max. kiadható szabadság megadása kötelező (0 vagy több).', 'error');
               return;
             }
+            const excludedShiftCodes = Array.from(body.querySelectorAll('.ex-shift-cb:checked')).map(cb => cb.value);
             emp.name = name; emp.groupId = groupId;
             emp.employmentFactor = isNaN(factor) || factor <= 0 ? 1 : factor;
             emp.maxVacationDays = Number(maxVacRaw);
             emp.notes = notes;
+            emp.excludedShiftCodes = excludedShiftCodes;
             if (isNew) state.employees.push(emp);
             DB.save();
             close();

@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using BeosztasVarazslo.Helpers;
 using BeosztasVarazslo.Services;
 using BeosztasVarazslo.Views;
 
@@ -20,7 +19,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        WindowBackdrop.Apply(this, ThemeDetector.IsSystemDarkTheme());
 
         _settingsView = new SettingsView(_repo);
         _groupsView = new GroupsView(_repo);

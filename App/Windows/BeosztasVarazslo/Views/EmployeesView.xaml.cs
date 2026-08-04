@@ -63,9 +63,12 @@ public partial class EmployeesView : UserControl, IRefreshableView
                 var used = _repo.YearVacationUsed(emp.Id, year);
                 var remaining = emp.MaxVacationDays - used;
 
+                var nameText = emp.ExcludedShiftCodes.Count > 0
+                    ? $"{emp.Name} (Kizárva: {string.Join(", ", emp.ExcludedShiftCodes)})"
+                    : emp.Name;
                 var row = BuildRow(new[]
                 {
-                    emp.Name,
+                    nameText,
                     FormatNum(emp.EmploymentFactor),
                     emp.MaxVacationDays.ToString(),
                     used.ToString(),

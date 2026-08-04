@@ -18,6 +18,7 @@ import hu.beosztasvarazslo.app.R
 import hu.beosztasvarazslo.app.data.AppRepository
 import hu.beosztasvarazslo.app.data.EmployeeEntity
 import hu.beosztasvarazslo.app.data.GroupWithShiftTypes
+import hu.beosztasvarazslo.app.data.excludedShiftCodeList
 import hu.beosztasvarazslo.app.databinding.FragmentScheduleBinding
 import hu.beosztasvarazslo.app.logic.GROUP_TYPE_OFFICE
 import hu.beosztasvarazslo.app.logic.ScheduleCalculator
@@ -236,35 +237,52 @@ class ScheduleFragment : Fragment() {
             .setTitle("${employee.name} – $day. nap")
             .setItems(labels) { _, which ->
                 val newCode = options[which].first
-                lifecycleScope.launch {
-                    if (newCode == ScheduleCalculator.CODE_VACATION && oldCode != ScheduleCalculator.CODE_VACATION) {
-                        val used = repo().yearVacationUsed(employee.id, selYear)
-                        if (used + 1 > employee.maxVacationDays) {
-                            toast("${employee.name} már elérte a max. kiadható szabadság napok számát (${employee.maxVacationDays} nap, $selYear).")
-                            return@launch
-                        }
-                    }
-                    repo().setCell(employee.id, selYear, selMonth, day, newCode)
-
-                    // Hirtelen beteg szabadság: ha egymást váltó (staffPerShift > 0) csoportban
-                    // egy munkanap beteg szabadságra vált, automatikusan keresünk rá helyettest.
-                    val wasWorkingShift = gws.shiftTypes.any { it.code == oldCode }
-                    if (newCode == ScheduleCalculator.CODE_SICK && oldCode != ScheduleCalculator.CODE_SICK &&
-                        gws.group.staffPerShift > 0 && wasWorkingShift
-                    ) {
-                        val groupEmployees = repo().getEmployeesForGroup(gws.group.id)
-                        val substitute = repo().findSickSubstitute(gws.group, groupEmployees, selYear, selMonth, day, employee.id, oldCode)
-                        if (substitute != null) {
-                            toast("${employee.name} beteg szabadságra került ($day. nap). Automatikus helyettes: ${substitute.name} ($oldCode műszak).")
-                        } else {
-                            toast("${employee.name} beteg szabadságra került ($day. nap), de nincs elérhető szabad helyettes - a műszak létszáma emiatt a szükséges alá csökkenhet!")
-                        }
-                    }
-                    rebuildGrid()
+                if (newCode.isNotEmpty() && newCode != oldCode && employee.excludedShiftCodeList().contains(newCode)) {
+                    val shiftLabel = gws.shiftTypes.find { it.code == newCode }
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Megerősítés")
+                        .setMessage(
+                            "${employee.name} kérésre nem szeretne ${shiftLabel?.let { it.label + " (" + newCode + ")" } ?: newCode} " +
+                                "műszakban dolgozni. Biztosan mégis ezt a műszakot jelölöd ki?"
+                        )
+                        .setNegativeButton("Mégse", null)
+                        .setPositiveButton("Igen") { _, _ -> applyCellChoice(employee, gws, day, oldCode, newCode) }
+                        .show()
+                } else {
+                    applyCellChoice(employee, gws, day, oldCode, newCode)
                 }
             }
             .setNegativeButton("Mégse", null)
             .show()
+    }
+
+    private fun applyCellChoice(employee: EmployeeEntity, gws: GroupWithShiftTypes, day: Int, oldCode: String, newCode: String) {
+        lifecycleScope.launch {
+            if (newCode == ScheduleCalculator.CODE_VACATION && oldCode != ScheduleCalculator.CODE_VACATION) {
+                val used = repo().yearVacationUsed(employee.id, selYear)
+                if (used + 1 > employee.maxVacationDays) {
+                    toast("${employee.name} már elérte a max. kiadható szabadság napok számát (${employee.maxVacationDays} nap, $selYear).")
+                    return@launch
+                }
+            }
+            repo().setCell(employee.id, selYear, selMonth, day, newCode)
+
+            // Hirtelen beteg szabadság: ha egymást váltó (staffPerShift > 0) csoportban
+            // egy munkanap beteg szabadságra vált, automatikusan keresünk rá helyettest.
+            val wasWorkingShift = gws.shiftTypes.any { it.code == oldCode }
+            if (newCode == ScheduleCalculator.CODE_SICK && oldCode != ScheduleCalculator.CODE_SICK &&
+                gws.group.staffPerShift > 0 && wasWorkingShift
+            ) {
+                val groupEmployees = repo().getEmployeesForGroup(gws.group.id)
+                val substitute = repo().findSickSubstitute(gws.group, groupEmployees, selYear, selMonth, day, employee.id, oldCode)
+                if (substitute != null) {
+                    toast("${employee.name} beteg szabadságra került ($day. nap). Automatikus helyettes: ${substitute.name} ($oldCode műszak).")
+                } else {
+                    toast("${employee.name} beteg szabadságra került ($day. nap), de nincs elérhető szabad helyettes - a műszak létszáma emiatt a szükséges alá csökkenhet!")
+                }
+            }
+            rebuildGrid()
+        }
     }
 
     private fun copyPreviousMonthCarry() {
@@ -309,11 +327,14 @@ class ScheduleFragment : Fragment() {
         lifecycleScope.launch {
             val result = repo().autoFillMonth(selYear, selMonth)
             rebuildGrid()
+            val restNote = if (result.restCellsMarked > 0)
+                " (ebből ${result.restCellsMarked} pihenőnap az előző havi utolsó műszak miatti kötelező pihenőidő miatt)"
+            else ""
             when {
                 result.filledCells == 0 && result.shortfalls.isEmpty() ->
                     toast("Nem volt kitöltendő üres cella ebben a hónapban.")
                 result.shortfalls.isEmpty() ->
-                    toast("${result.filledCells} cella automatikusan kitöltve.")
+                    toast("${result.filledCells} cella automatikusan kitöltve$restNote.")
                 else -> {
                     val details = result.shortfalls.take(5).joinToString("; ") {
                         "${it.groupName} – ${it.day}. nap, ${it.shiftLabel}: ${it.assigned}/${it.needed} fő"

@@ -186,6 +186,19 @@
         renderScheduleTable();
         return;
       }
+      if (newCode && newCode !== oldCode && (employee.excludedShiftCodes || []).includes(newCode)) {
+        const shiftLabel = (group.shiftTypes || []).find(st => st.code === newCode);
+        UI.confirmDialog(
+          employee.name + ' kérésre nem szeretne ' + (shiftLabel ? shiftLabel.label + ' (' + newCode + ')' : newCode) +
+          ' műszakban dolgozni. Biztosan mégis ezt a műszakot jelölöd ki?',
+          () => { applyCell(newCode); }
+        );
+        return;
+      }
+      applyCell(newCode);
+    }
+
+    function applyCell(newCode) {
       Calc.setCell(state, selYear, selMonth, employee.id, day, newCode);
 
       // Hirtelen beteg szabadság: ha egy műszakban dolgozó (egymást váltó) csoporttag
@@ -304,21 +317,24 @@
     UI.confirmDialog(
       'Automatikusan kitölti a(z) ' + DB.MONTH_NAMES[selMonth - 1] + ' ' + selYear + ' hónap ÜRES celláit: ' +
       'irodai csoportoknál minden munkanapra munkaórát ír, az egymást váltó (létszám-figyelt) csoportoknál pedig ' +
-      'a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra. A már kitöltött cellákat nem érinti. Folytatod?',
+      'a beállított pihenőidőt betartva, méltányosan elosztva jelöl ki dolgozókat műszakra (a kizárt műszaktípusokat és az előző havi utolsó műszak miatti pihenőidőt figyelembe véve). A már kitöltött cellákat nem érinti. Folytatod?',
       () => {
         const result = Calc.autoFillMonth(state, selYear, selMonth);
         DB.save();
         renderScheduleTable();
+        const restNote = result.restCellsMarked > 0
+          ? ' (ebből ' + result.restCellsMarked + ' pihenőnap az előző havi utolsó műszak miatti kötelező pihenőidő miatt)'
+          : '';
         if (result.filledCells === 0 && result.shortfalls.length === 0) {
           UI.toast('Nem volt kitöltendő üres cella ebben a hónapban.', 'success');
         } else if (result.shortfalls.length === 0) {
-          UI.toast(result.filledCells + ' cella automatikusan kitöltve.', 'success');
+          UI.toast(result.filledCells + ' cella automatikusan kitöltve' + restNote + '.', 'success');
         } else {
           const details = result.shortfalls.slice(0, 5).map(s =>
             s.group + ' – ' + s.day + '. nap, ' + s.shiftLabel + ': ' + s.assigned + '/' + s.needed + ' fő'
           ).join('; ');
           UI.toast(
-            result.filledCells + ' cella kitöltve, de ' + result.shortfalls.length + ' esetben nem volt elég szabad/pihent dolgozó (' +
+            result.filledCells + ' cella kitöltve' + restNote + ', de ' + result.shortfalls.length + ' esetben nem volt elég szabad/pihent dolgozó (' +
             details + (result.shortfalls.length > 5 ? '; …' : '') + ').',
             'error'
           );

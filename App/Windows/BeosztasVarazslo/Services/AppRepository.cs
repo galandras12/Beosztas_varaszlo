@@ -243,6 +243,7 @@ public class AppRepository
         foreach (var emp in employees)
         {
             if (emp.Id == sickEmployeeId) continue;
+            if (emp.ExcludedShiftCodes.Contains(shiftCode)) continue; // kérésre nem osztható be ebbe a műszaktípusba
             var codes = GetMonthCodes(emp.Id, year, month);
             if (codes.TryGetValue(day, out var existing) && !string.IsNullOrEmpty(existing)) continue;
 
@@ -261,24 +262,33 @@ public class AppRepository
     }
 
     public record AutoFillShortfall(string Group, int Day, string ShiftLabel, int Needed, int Assigned);
-    public record AutoFillResult(int FilledCells, List<AutoFillShortfall> Shortfalls);
+    public record AutoFillResult(int FilledCells, int RestCellsMarked, List<AutoFillShortfall> Shortfalls);
 
     /// <summary>
     /// Automatikus beosztás-kitöltő. Csak ÜRES cellákba ír - meglévő (kézzel beírt vagy korábban
     /// generált) kódokat sosem ír felül.
     /// - Irodai (hétfő-péntek) csoportoknál: minden munkanapon minden dolgozóhoz "M" kódot ír.
     /// - Egymást váltó, létszám-figyelt (StaffPerShift > 0) csoportoknál: napról napra,
-    ///   műszaktípusonként annyi szabad, a csoport MinRestHours pihenőidejét betartó dolgozót
-    ///   jelöl ki, ameddig a szükséges létszám meg nem telik - a legkevesebb eddig ledolgozott
-    ///   órájú, egyformaság esetén névsor szerinti dolgozókat részesítve előnyben. Ha nincs elég
+    ///   műszaktípusonként annyi szabad, a csoport MinRestHours pihenőidejét betartó, a kérésre
+    ///   kizárt műszaktípusokat (ExcludedShiftCodes) figyelmen kívül hagyó dolgozót jelöl ki,
+    ///   ameddig a szükséges létszám meg nem telik - a legkevesebb eddig ledolgozott órájú,
+    ///   egyformaság esetén névsor szerinti dolgozókat részesítve előnyben. Ha nincs elég
     ///   szabad/pihent dolgozó, annyit oszt be, amennyi van, és a hiányt jelzi.
+    /// - Hónapváltás: ha egy dolgozó az előző hónap utolsó napjaiban dolgozott (a csoport
+    ///   műszaktípusai közül valamelyiket), a pihenőidőt a hónaphatáron át is figyelembe veszi,
+    ///   és a hónap elején még szükséges pihenőnapokat explicit "P" kóddal jelöli.
     /// </summary>
     public AutoFillResult AutoFillMonth(int year, int month)
     {
         var dim = ScheduleCalculator.DaysInMonth(year, month);
         var holidayMap = GetHolidayMap(year);
         int filledCells = 0;
+        int restCellsMarked = 0;
         var shortfalls = new List<AutoFillShortfall>();
+
+        int prevYear = year, prevMonth = month - 1;
+        if (prevMonth < 1) { prevMonth = 12; prevYear -= 1; }
+        var prevDim = ScheduleCalculator.DaysInMonth(prevYear, prevMonth);
 
         foreach (var group in GetGroupsSorted())
         {
@@ -305,6 +315,7 @@ public class AppRepository
             {
                 int minRestDays = (int)Math.Ceiling(group.MinRestHours / 24.0);
                 var codesByEmployee = groupEmployees.ToDictionary(e => e.Id, e => GetMonthCodes(e.Id, year, month));
+                var prevCodesByEmployee = groupEmployees.ToDictionary(e => e.Id, e => GetMonthCodes(e.Id, prevYear, prevMonth));
                 var lastWorkedDay = new Dictionary<long, int>();
                 var shiftCount = new Dictionary<long, int>();
 
@@ -312,6 +323,16 @@ public class AppRepository
                 {
                     lastWorkedDay[emp.Id] = int.MinValue;
                     shiftCount[emp.Id] = 0;
+
+                    // Hónaphatáron átnyúló pihenőidő: az előző hónap utolsó, ebben a csoportban
+                    // ledolgozott napja "0" (utolsó nap), "-1" (utolsó előtti) stb. relatív napot kap.
+                    var prevCodes = prevCodesByEmployee[emp.Id];
+                    for (int pd = 1; pd <= prevDim; pd++)
+                    {
+                        if (prevCodes.TryGetValue(pd, out var prevCode) && group.ShiftTypes.Any(st => st.Code == prevCode))
+                            lastWorkedDay[emp.Id] = pd - prevDim;
+                    }
+
                     var codes = codesByEmployee[emp.Id];
                     for (int d = 1; d <= dim; d++)
                     {
@@ -320,6 +341,22 @@ public class AppRepository
                             lastWorkedDay[emp.Id] = d;
                             shiftCount[emp.Id]++;
                         }
+                    }
+                }
+
+                // Az előző havi utolsó műszak miatt még kötelező pihenőnapokat explicit "P" kóddal jelöljük.
+                foreach (var emp in groupEmployees)
+                {
+                    var last = lastWorkedDay[emp.Id];
+                    if (last == int.MinValue || last > 0) continue;
+                    var codes = codesByEmployee[emp.Id];
+                    for (int d = 1; d <= dim && (d - last) <= minRestDays; d++)
+                    {
+                        if (codes.TryGetValue(d, out var existing) && !string.IsNullOrEmpty(existing)) continue;
+                        SetCell(emp.Id, year, month, d, "P");
+                        codes[d] = "P";
+                        restCellsMarked++;
+                        filledCells++;
                     }
                 }
 
@@ -338,6 +375,7 @@ public class AppRepository
 
                         var candidates = groupEmployees.Where(emp =>
                         {
+                            if (emp.ExcludedShiftCodes.Contains(st.Code)) return false;
                             if (assignedToday.Contains(emp.Id)) return false;
                             if (codesByEmployee[emp.Id].TryGetValue(d, out var existing) && !string.IsNullOrEmpty(existing)) return false;
                             var last = lastWorkedDay[emp.Id];
@@ -365,6 +403,6 @@ public class AppRepository
             }
         }
 
-        return new AutoFillResult(filledCells, shortfalls);
+        return new AutoFillResult(filledCells, restCellsMarked, shortfalls);
     }
 }

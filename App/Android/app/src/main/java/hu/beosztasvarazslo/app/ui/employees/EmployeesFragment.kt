@@ -5,13 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import hu.beosztasvarazslo.app.data.EmployeeEntity
 import hu.beosztasvarazslo.app.data.GroupWithShiftTypes
+import hu.beosztasvarazslo.app.data.excludedShiftCodeList
+import hu.beosztasvarazslo.app.data.toExcludedShiftCodesString
 import hu.beosztasvarazslo.app.databinding.DialogEmployeeEditBinding
+import hu.beosztasvarazslo.app.logic.GROUP_TYPE_OFFICE
 import hu.beosztasvarazslo.app.databinding.FragmentEmployeesBinding
 import hu.beosztasvarazslo.app.ui.common.confirmDialog
 import hu.beosztasvarazslo.app.ui.common.repo
@@ -104,6 +108,30 @@ class EmployeesFragment : Fragment() {
                 dialogBinding.etMaxVacation.setText("20")
             }
 
+            val existingExcluded = existing?.excludedShiftCodeList() ?: emptyList()
+
+            fun renderExcludedShifts() {
+                val group = groups[dialogBinding.spGroup.selectedItemPosition]
+                dialogBinding.excludedShiftsContainer.removeAllViews()
+                if (group.group.type == GROUP_TYPE_OFFICE || group.shiftTypes.size < 2) {
+                    dialogBinding.excludedShiftsWrap.visibility = View.GONE
+                    return
+                }
+                dialogBinding.excludedShiftsWrap.visibility = View.VISIBLE
+                group.shiftTypes.forEach { st ->
+                    val cb = CheckBox(requireContext())
+                    cb.text = "${st.label} (${st.code})"
+                    cb.tag = st.code
+                    cb.isChecked = existingExcluded.contains(st.code)
+                    dialogBinding.excludedShiftsContainer.addView(cb)
+                }
+            }
+            renderExcludedShifts()
+            dialogBinding.spGroup.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) = renderExcludedShifts()
+                override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+            })
+
             AlertDialog.Builder(requireContext())
                 .setTitle(if (existing == null) "Új dolgozó" else "Dolgozó szerkesztése")
                 .setView(dialogBinding.root)
@@ -126,13 +154,19 @@ class EmployeesFragment : Fragment() {
                                 return@setOnClickListener
                             }
 
+                            val excludedCodes = (0 until dialogBinding.excludedShiftsContainer.childCount)
+                                .map { dialogBinding.excludedShiftsContainer.getChildAt(it) as CheckBox }
+                                .filter { it.isChecked }
+                                .map { it.tag as String }
+
                             val employee = EmployeeEntity(
                                 id = existing?.id ?: 0,
                                 name = name,
                                 groupId = selectedGroup.group.id,
                                 employmentFactor = if (factor == null || factor <= 0) 1.0 else factor,
                                 maxVacationDays = maxVac,
-                                notes = notes
+                                notes = notes,
+                                excludedShiftCodes = excludedCodes.toExcludedShiftCodesString()
                             )
                             lifecycleScope.launch {
                                 repo().saveEmployee(employee)
