@@ -4,13 +4,13 @@
         Title="Dolgozó"
         Width="460" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
+        ShowInTaskbar="False" Background="Black">
     <StackPanel Margin="22">
         <TextBlock Text="Név" Style="{StaticResource HintText}" Margin="0,0,0,4" />
         <TextBox x:Name="TxtName" Margin="0,0,0,14" />
 
         <TextBlock Text="Munkacsoport" Style="{StaticResource HintText}" Margin="0,0,0,4" />
-        <ComboBox x:Name="CmbGroup" Margin="0,0,0,14" DisplayMemberPath="Name" />
+        <ComboBox x:Name="CmbGroup" Margin="0,0,0,14" DisplayMemberPath="Name" Foreground="Black" />
 
         <TextBlock Text="Munkaidő-arány (1 = teljes, 0.5 = fél)" Style="{StaticResource HintText}" Margin="0,0,0,4" />
         <TextBox x:Name="TxtFactor" Margin="0,0,0,14" />

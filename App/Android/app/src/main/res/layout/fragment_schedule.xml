@@ -72,18 +72,18 @@
                     android:columnCount="4"
                     android:rowCount="3">
 
-                    <Button android:id="@+id/btnMonth1" style="@style/Widget.Glass.Button.Link" android:text="Jan" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth2" style="@style/Widget.Glass.Button.Link" android:text="Feb" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth3" style="@style/Widget.Glass.Button.Link" android:text="Már" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth4" style="@style/Widget.Glass.Button.Link" android:text="Ápr" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth5" style="@style/Widget.Glass.Button.Link" android:text="Máj" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth6" style="@style/Widget.Glass.Button.Link" android:text="Jún" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth7" style="@style/Widget.Glass.Button.Link" android:text="Júl" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth8" style="@style/Widget.Glass.Button.Link" android:text="Aug" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth9" style="@style/Widget.Glass.Button.Link" android:text="Sze" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth10" style="@style/Widget.Glass.Button.Link" android:text="Okt" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth11" style="@style/Widget.Glass.Button.Link" android:text="Nov" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
-                    <Button android:id="@+id/btnMonth12" style="@style/Widget.Glass.Button.Link" android:text="Dec" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth1" style="@style/Widget.Glass.Button.Compact" android:text="Jan" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth2" style="@style/Widget.Glass.Button.Compact" android:text="Feb" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth3" style="@style/Widget.Glass.Button.Compact" android:text="Már" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth4" style="@style/Widget.Glass.Button.Compact" android:text="Ápr" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth5" style="@style/Widget.Glass.Button.Compact" android:text="Máj" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth6" style="@style/Widget.Glass.Button.Compact" android:text="Jún" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth7" style="@style/Widget.Glass.Button.Compact" android:text="Júl" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth8" style="@style/Widget.Glass.Button.Compact" android:text="Aug" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth9" style="@style/Widget.Glass.Button.Compact" android:text="Sze" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth10" style="@style/Widget.Glass.Button.Compact" android:text="Okt" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth11" style="@style/Widget.Glass.Button.Compact" android:text="Nov" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
+                    <Button android:id="@+id/btnMonth12" style="@style/Widget.Glass.Button.Compact" android:text="Dec" android:layout_width="0dp" android:layout_columnWeight="1" android:layout_gravity="fill_horizontal"/>
                 </GridLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

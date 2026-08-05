@@ -14,7 +14,6 @@
         <item name="colorOnSurface">@color/m3_on_surface</item>
         <item name="colorOnSurfaceVariant">@color/m3_on_surface_variant</item>
         <item name="colorOutline">@color/m3_outline</item>
-        <item name="colorBackground">@color/background</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="colorError">@color/m3_error</item>
         <item name="android:windowLightStatusBar">true</item>

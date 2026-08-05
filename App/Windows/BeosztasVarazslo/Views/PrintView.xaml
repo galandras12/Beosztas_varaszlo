@@ -13,7 +13,7 @@
                     <TextBlock Text="Év" VerticalAlignment="Center" Margin="0,0,8,0"
                                Foreground="{DynamicResource TextSecondaryBrush}" />
                     <TextBox x:Name="TxtYear" Width="100" Margin="0,0,16,0" LostFocus="Selection_Changed" />
-                    <ComboBox x:Name="CmbMonth" Width="160" SelectionChanged="Selection_Changed" />
+                    <ComboBox x:Name="CmbMonth" Width="160" SelectionChanged="Selection_Changed" Foreground="Black"/>
                 </StackPanel>
 
                 <TextBlock x:Name="TxtSummary" Margin="0,10,0,0" Foreground="{DynamicResource TextPrimaryBrush}" />

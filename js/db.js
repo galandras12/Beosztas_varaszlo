@@ -107,8 +107,128 @@
     return year + '-' + month;
   }
 
+  const EXPORT_FORMAT = 'beosztas-varazslo-v1';
+
+  // A csoporttípus a belső állapotban 'altalanos'/'iroda' (kisbetűs), a közös
+  // exportformátumban - hogy az Android/Windows verziókkal is egyezzen - 'ALTALANOS'/'IRODA'.
+  function typeToCanonical(type) { return type === 'iroda' ? 'IRODA' : 'ALTALANOS'; }
+  function typeFromCanonical(type) { return String(type).toUpperCase() === 'IRODA' ? 'iroda' : 'altalanos'; }
+
+  /**
+   * A belső (localStorage-beli, egymásba ágyazott szótárakból álló) állapotot az Android/
+   * Windows verzióval is közös, lapos tömbökből álló "közös exportformátumra" alakítja -
+   * ez teszi lehetővé, hogy egy itt exportált fájl bármelyik platformon importálható legyen,
+   * és fordítva.
+   */
+  function toCanonicalExport(s) {
+    const monthHours = [];
+    for (let m = 1; m <= 12; m++) {
+      const rec = s.monthHours[m];
+      if (rec) monthHours.push({ month: m, hours: rec.hours, days: rec.days });
+    }
+
+    const groups = (s.groups || []).map(g => ({
+      id: String(g.id), name: g.name, type: typeToCanonical(g.type),
+      dailyHours: g.dailyHours, staffPerShift: g.staffPerShift || 0,
+      minRestHours: g.minRestHours != null ? g.minRestHours : 24,
+      shiftTypes: (g.shiftTypes || []).map(st => ({ code: st.code, label: st.label, hours: st.hours }))
+    }));
+
+    const employees = (s.employees || []).map(e => ({
+      id: String(e.id), name: e.name, groupId: String(e.groupId),
+      employmentFactor: e.employmentFactor != null ? e.employmentFactor : 1,
+      maxVacationDays: e.maxVacationDays, notes: e.notes || '',
+      excludedShiftCodes: e.excludedShiftCodes || []
+    }));
+
+    const schedule = [];
+    Object.keys(s.schedule || {}).forEach(key => {
+      const [year, month] = key.split('-').map(Number);
+      const monthData = s.schedule[key];
+      Object.keys(monthData).forEach(employeeId => {
+        const days = monthData[employeeId];
+        Object.keys(days).forEach(day => {
+          schedule.push({ employeeId: String(employeeId), year, month, day: Number(day), code: days[day] });
+        });
+      });
+    });
+
+    const carryOvers = [];
+    Object.keys(s.carryOver || {}).forEach(key => {
+      const [year, month] = key.split('-').map(Number);
+      const monthData = s.carryOver[key];
+      Object.keys(monthData).forEach(employeeId => {
+        carryOvers.push({ employeeId: String(employeeId), year, month, hours: monthData[employeeId] });
+      });
+    });
+
+    const holidaysExtra = [];
+    Object.keys(s.holidaysExtra || {}).forEach(year => {
+      const dates = s.holidaysExtra[year];
+      Object.keys(dates).forEach(date => holidaysExtra.push({ year: Number(year), date, name: dates[date] }));
+    });
+
+    const holidaysRemoved = [];
+    Object.keys(s.holidaysRemoved || {}).forEach(year => {
+      (s.holidaysRemoved[year] || []).forEach(date => holidaysRemoved.push({ year: Number(year), date }));
+    });
+
+    return {
+      exportFormat: EXPORT_FORMAT, generatedBy: 'web', generatedAt: new Date().toISOString(),
+      monthHours, groups, employees, schedule, carryOvers, holidaysExtra, holidaysRemoved
+    };
+  }
+
+  /** A közös exportformátumból építi fel a belső állapotot (lásd toCanonicalExport). */
+  function fromCanonicalExport(data) {
+    const s = defaultState();
+
+    (data.monthHours || []).forEach(mh => { s.monthHours[mh.month] = { hours: mh.hours, days: mh.days }; });
+
+    s.groups = (data.groups || []).map(g => ({
+      id: String(g.id), name: g.name, type: typeFromCanonical(g.type),
+      dailyHours: g.dailyHours, staffPerShift: g.staffPerShift || 0,
+      minRestHours: g.minRestHours != null ? g.minRestHours : 24,
+      shiftTypes: (g.shiftTypes || []).map(st => ({ code: st.code, label: st.label, hours: st.hours }))
+    }));
+
+    s.employees = (data.employees || []).map(e => ({
+      id: String(e.id), name: e.name, groupId: String(e.groupId),
+      employmentFactor: e.employmentFactor != null ? e.employmentFactor : 1,
+      maxVacationDays: e.maxVacationDays, notes: e.notes || '',
+      excludedShiftCodes: e.excludedShiftCodes || []
+    }));
+
+    (data.schedule || []).forEach(entry => {
+      const key = scheduleKey(entry.year, entry.month);
+      if (!s.schedule[key]) s.schedule[key] = {};
+      const empId = String(entry.employeeId);
+      if (!s.schedule[key][empId]) s.schedule[key][empId] = {};
+      s.schedule[key][empId][entry.day] = entry.code;
+    });
+
+    (data.carryOvers || []).forEach(entry => {
+      const key = scheduleKey(entry.year, entry.month);
+      if (!s.carryOver[key]) s.carryOver[key] = {};
+      s.carryOver[key][String(entry.employeeId)] = entry.hours;
+    });
+
+    (data.holidaysExtra || []).forEach(entry => {
+      if (!s.holidaysExtra[entry.year]) s.holidaysExtra[entry.year] = {};
+      s.holidaysExtra[entry.year][entry.date] = entry.name;
+    });
+
+    (data.holidaysRemoved || []).forEach(entry => {
+      if (!s.holidaysRemoved[entry.year]) s.holidaysRemoved[entry.year] = [];
+      s.holidaysRemoved[entry.year].push(entry.date);
+    });
+
+    if (s.groups.length === 0) s.groups = defaultGroups();
+    return s;
+  }
+
   function exportToFile() {
-    const data = JSON.stringify(getState(), null, 2);
+    const data = JSON.stringify(toCanonicalExport(getState()), null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -127,10 +247,10 @@
     reader.onload = function (e) {
       try {
         const parsed = JSON.parse(e.target.result);
-        if (!parsed || typeof parsed !== 'object' || !parsed.employees || !parsed.groups) {
-          throw new Error('A fájl formátuma nem megfelelő.');
+        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.employees) || !Array.isArray(parsed.groups)) {
+          throw new Error('A fájl formátuma nem megfelelő (nem a közös Beosztás Varázsló exportformátum).');
         }
-        state = parsed;
+        state = fromCanonicalExport(parsed);
         save();
         cb && cb(null);
       } catch (err) {

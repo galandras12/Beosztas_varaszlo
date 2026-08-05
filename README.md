@@ -41,6 +41,19 @@ Mindhárom verzió ugyanazt az öt fő területet fedi le:
    hónapra átvitt órákkal. Exportálható PDF-be (több oldalra törve, ha sok a dolgozó) és
    JPG-be.
 
+## Adatbázis mentése/betöltése – átjárhatóság a három verzió között
+
+Mindhárom verzió "Adatbázis mentése fájlba" / "Adatbázis betöltése fájlból" gombja **ugyanazt
+a közös, platformfüggetlen JSON-formátumot** ("beosztas-varazslo-v1") használja - egy
+Androidon elkészített és exportált beosztás (munkacsoportok, dolgozók, havi óraszám-tábla,
+ünnepnapok, teljes beosztási rács, bejövő órák) **bármelyik másik verzióban** (böngésző,
+Windows, vagy egy másik Android-eszköz) importálható, és fordítva. A betöltés mindig teljesen
+felülírja a célalkalmazás aktuális adatait, ezért a program megerősítést kér importálás előtt.
+Az azonosítók (munkacsoport-/dolgozó-id) platformonként eltérő belső formátumúak lehetnek
+(a böngészőben szöveges, Androidon/Windowson szám alapú) - importáláskor minden alkalmazás
+saját, új azonosítókat generál, és ezek alapján köti vissza helyesen a dolgozókat a
+munkacsoportokhoz és a beosztási/bejövőóra-bejegyzésekhez.
+
 ### Havi kötelező óraszám (alapérték)
 
 | Hónap | Óra | Munkanap | Hónap | Óra | Munkanap |
@@ -63,9 +76,9 @@ a munkaidő-arány (pl. részmunkaidő), a kivett szabadság/hiányzás, illetve
 - **Android**: ha telefonon/tableten, alkalmazásként (internet nélkül is) szeretnéd
   használni; lásd az [App/Android/README.md](App/Android/README.md) fájlt a fordítási
   lépésekhez.
-- **Windows**: ha asztali gépen, natív, modern (Fluent-stílusú) Windows alkalmazásként
-  szeretnéd használni; lásd az [App/Windows/README.md](App/Windows/README.md) fájlt a
-  fordítási lépésekhez.
+- **Windows**: ha asztali gépen, natív, klasszikus Microsoft "Metro" stílusú Windows
+  alkalmazásként szeretnéd használni; lásd az [App/Windows/README.md](App/Windows/README.md)
+  fájlt a fordítási lépésekhez.
 
 Az Android és Windows verziót ebben a fejlesztői környezetben nem lehetett lefordítani és
 tesztelni (nincs Android SDK, illetve .NET SDK, és a hozzájuk tartozó letöltési szerverek
